@@ -1,0 +1,407 @@
+/**
+ * index.css
+ * The Level Lab landing page: a traditional scrolling page through Welcome,
+ * Build, Play, Learn, and Safety. Self-contained -- relies only on the design
+ * tokens from common/style.css (the shared header/footer + global-nav styles
+ * live there). index.css only loads on this page.
+ */
+
+/* Cross-fade the navigation between this page and home. Cross-document view
+   transitions need both documents opted in, which scopes the fade to
+   index <-> home (home.css mirrors this); unsupported browsers just navigate.
+   The fade's duration + reduced-motion handling live in common/style.css. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Shared section furniture (.section-eyebrow, .cta, .feature) lives in
+   common/style.css. */
+
+/* Reveal-on-scroll (opacity + lift, .is-visible toggled by index.js's
+   IntersectionObserver; reduced-motion shows immediately). The .reveal /
+   .is-visible / reduced-motion rules are shared across all landing-shell
+   pages -- see common/style.css. */
+
+/* The glass section panels (Welcome / Build / Play / Grow / Trust here) are the
+   universal treatment from common/style.css -- every section is a .feature, which
+   carries the panel implicitly. The Welcome intro is a standard .feature row
+   (clip in the media slot, copy beside it), so it needs no rules of its own. */
+
+/* ============================================
+   Feature rows (Build, Play) -- media + text, alternating sides
+   ============================================ */
+
+.feature-media {
+  position: relative;
+  /* Height (fills the text column, floored at 16:9) is the universal
+     media-panel rule in common/style.css. */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: var(--border-width) var(--border-style) var(--color-border);
+  background:
+    radial-gradient(120% 90% at 30% 20%, var(--color-accent-dark) 0%, transparent 60%),
+    linear-gradient(160deg, var(--color-surface) 0%, var(--color-background) 70%);
+}
+
+.feature-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.75s ease;
+}
+
+.feature-video.is-loaded {
+  opacity: 1;
+}
+
+/* The Welcome scroll hint reuses the shared .grid-more control (style.css).
+   That control anchors via top: 100% to a full-width .project-grid at the
+   bottom of the row -- which Welcome doesn't have -- so make the panel the
+   positioning context and re-anchor the control to its own bottom padding
+   (bottom: 0 fills the band the shared height reserves). */
+#welcome {
+  position: relative;
+}
+
+#welcome .grid-more {
+  top: auto;
+  bottom: 0;
+}
+
+/* ============================================
+   Steps (Build, Play) -- numbered vertical list
+   ============================================ */
+
+.steps {
+  list-style: none;
+  /* Breathing room above (lead -> step 1); the gap below is the universal
+     .cta-row offset (common/style.css). */
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-dark);
+}
+
+.step-num {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: var(--color-surface-light);
+  /* Theme-mapped accent so the glyph stays readable on the light-theme
+     chip too (see --color-accent-text in style.css). */
+  color: var(--color-accent-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ============================================
+   Pillars (Welcome) -- the four-pillar value list under the intro title.
+   Native accent-colored discs (a flex container would suppress list markers,
+   so items flow as list-items and space with margin, not gap).
+   ============================================ */
+
+.pillars {
+  /* Breathing room above (lead -> list); the gap below is the universal
+     .cta-row offset (common/style.css). */
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-4);
+  list-style: disc;
+  color: var(--color-text-dark);
+}
+
+.pillar + .pillar {
+  margin-top: var(--space-2);
+}
+
+.pillar::marker {
+  color: var(--color-accent);
+}
+
+/* Bold label lead-in, shared by the pillar list and the numbered steps so the
+   two lists read as one style. The em-dash separator lives in the markup,
+   outside this span, so it stays unbolded. */
+.step-label,
+.pillar-label {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+/* ============================================
+   Grow + Trust -- the growth cards and the safety cards share one flip-card
+   component (.flip-card, below) and the standard section layout: a head in one
+   column (the other reserved empty) over a full-width .feature-row of cards
+   (see .feature-row / .feature-col-right in common/style.css). Grow puts the
+   head left with three cards; Trust puts it right with four. Each card flips on
+   hover or activation (tap / Enter / Space) to reveal its description.
+   ============================================ */
+
+/* Both card rows are full-width grids; only the column count differs. The
+   head-to-row gap is the parent .feature's grid row-gap, so no margin here. */
+.loop,
+.safety-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Grow: three across; stacks below 768px (the feature-stack breakpoint), where
+   three across would be too narrow for the icon-and-title front. */
+.loop {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+  .loop {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Section art (Grow, Trust): a transparent PNG that fills the section's
+   reserved column and composites onto the panel (no box or border). Grow's
+   sits in the right column, auto-placed after the left-column head; Trust's is
+   forced into the left column since its head is on the right. */
+.grow-image,
+.trust-image {
+  width: 100%;
+  height: auto;
+  /* Top-align with the head (the .feature default), so the art sits at the top
+     of its column even when the head is the taller element. */
+  align-self: start;
+}
+
+/* Pin to the top-left cell. Following the right-column head in source order,
+   sparse auto-placement would otherwise drop a column-1 item to the next row
+   (its column is before the cursor), leaving the art sitting below the head. */
+.trust-image {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+@media (max-width: 768px) {
+  /* Stacked: back to normal flow so it follows the head instead of pinning row 1. */
+  .trust-image {
+    grid-row: auto;
+  }
+}
+
+/* Trust: four across, stepping down to two then one as width tightens so the
+   longer back descriptions never clip the fixed card height. */
+.safety-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .safety-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .safety-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The card is the 3D stage: transparent and fixed-height (the two faces are
+   absolutely stacked, so height can't come from content), holding the
+   perspective for the flip. The card surface lives on the faces below. */
+.flip-card {
+  perspective: 1000px;
+  height: 150px;
+  cursor: pointer;
+}
+
+/* The focused card shows its ring on the front face (below), not the stage. */
+.flip-card:focus-visible {
+  outline: none;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+/* Flip on hover (mouse) or the .is-flipped class index.js toggles on tap /
+   Enter / Space. Focus shows the ring but does not auto-flip -- the card is a
+   disclosure the user opens deliberately (see aria-expanded in index.js). */
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Card surface: each face wears it so the card itself can stay a transparent 3D
+   stage. Shared by the Grow and Trust cards. The accent outline fades in on
+   hover/focus (transparent at rest so it never shifts layout). */
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  outline: var(--border-width) var(--border-style) transparent;
+  backface-visibility: hidden;
+  transition: outline-color 0.25s ease;
+}
+
+/* The open (flipped) card and the keyboard-focused card light their outline --
+   so a card opened by tap/Enter looks the same as one under the mouse (hover
+   adds the outline for pointers, gated below). */
+.flip-card.is-flipped .flip-face,
+.flip-card:focus-visible .flip-face {
+  outline-color: var(--color-accent);
+}
+
+/* Mouse hover flips the card and lights its outline. Gated to hover devices so a
+   touch tap's sticky :hover can't leave the card stuck flipped -- on touch the
+   tap toggles .is-flipped instead (index.js), so a second tap flips it back. */
+@media (hover: hover) and (pointer: fine) {
+  .flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip-card:hover .flip-face {
+    outline-color: var(--color-accent);
+  }
+}
+
+/* Front: icon chip pinned to the upper-left corner (mirroring the flip cue at
+   the upper-right), with the title centered in the card both ways. */
+.flip-face-front {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.flip-face-front .flip-icon {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+}
+
+/* Back: pre-rotated so its content reads correctly once the card flips, on a
+   lighter surface so the flip visibly turns something over. */
+.flip-face-back {
+  transform: rotateY(180deg);
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  background: var(--color-surface-light);
+}
+
+.flip-face-back .flip-title {
+  font-size: var(--font-size);
+  color: var(--color-accent-text);
+}
+
+/* Faces space their title via flex gap, so drop the shared bottom margin.
+   (Titles are authored in title case directly in the markup -- CSS capitalize
+   can't keep minor words like "in"/"the"/"at" lowercase.) */
+.flip-face .flip-title {
+  margin: 0;
+}
+
+/* Small flip affordance in the front corner (UtilsIcon.flip, injected). */
+.flip-cue {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  color: var(--color-text-dark);
+  opacity: 0.6;
+}
+
+.flip-cue svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.flip-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.flip-copy {
+  margin: 0;
+  font-size: var(--font-size);
+  color: var(--color-text-dark);
+}
+
+/* Icon chip, upper-left of the front face. */
+.flip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-light);
+  /* Theme-mapped accent (see .step-num above). */
+  color: var(--color-accent-text);
+}
+
+.flip-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
+   Reduced motion: freeze the feature clip fades (the shared .reveal reset
+   lives in common/style.css) and swap the Grow/Trust cards' 3D flip for a
+   plain cross-fade of the back over the front.
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .feature-video {
+    transition: none;
+  }
+
+  .flip-card-inner {
+    transition: none;
+  }
+
+  .flip-card:hover .flip-card-inner,
+  .flip-card.is-flipped .flip-card-inner {
+    transform: none;
+  }
+
+  /* No spin: sit the back flat on top of the front and fade it in. */
+  .flip-face-back {
+    transform: none;
+    backface-visibility: visible;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .flip-card.is-flipped .flip-face-back {
+    opacity: 1;
+  }
+
+  /* Hover-only, gated like the 3D flip above so touch relies on .is-flipped. */
+  @media (hover: hover) and (pointer: fine) {
+    .flip-card:hover .flip-face-back {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,140 @@
+﻿# Task 3 Review Package
+
+Base: pre-task snapshots
+Head: current controller and tests
+
+## hero-variants.mjs diff
+
+warning: in the working copy of 'hero-variants.mjs', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-3-before-hero-variants.mjs" b/hero-variants.mjs
+index e69de29..7b2a296 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-3-before-hero-variants.mjs"
++++ b/hero-variants.mjs
+@@ -0,0 +1,60 @@
++export const HERO_VERSIONS = new Set(["a", "b", "c"]);
++
++export function normalizeHeroVersion(search = "") {
++  const value = new URLSearchParams(search).get("hero");
++  return HERO_VERSIONS.has(value) ? value : "a";
++}
++
++export function setupHeroVariants(
++  root = document,
++  search = window.location.search,
++  motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)"),
++) {
++  const activeVersion = normalizeHeroVersion(search);
++  const links = root.querySelectorAll("[data-hero-version]");
++  const panels = root.querySelectorAll("[data-hero-panel]");
++
++  links.forEach((link) => {
++    const isActive = link.dataset.heroVersion === activeVersion;
++    link.classList.toggle("active", isActive);
++    if (isActive) {
++      link.setAttribute("aria-current", "page");
++    } else {
++      link.removeAttribute("aria-current");
++    }
++  });
++
++  let activeVideo = null;
++  panels.forEach((panel) => {
++    const isActive = panel.dataset.heroPanel === activeVersion;
++    panel.hidden = !isActive;
++    const video = panel.querySelector("[data-hero-video]");
++    if (!video || !isActive) return;
++
++    activeVideo = video;
++    if (!motionQuery.matches && video.dataset.src) {
++      video.src = video.dataset.src;
++      video.addEventListener("loadeddata", () => video.classList.add("is-loaded"), { once: true });
++    }
++  });
++
++  if (!activeVideo || motionQuery.matches || typeof IntersectionObserver === "undefined") {
++    return activeVersion;
++  }
++
++  const visibilityObserver = new IntersectionObserver((entries) => {
++    const visible = entries.some((entry) => entry.isIntersecting);
++    if (visible) {
++      activeVideo.play().catch(() => {});
++    } else {
++      activeVideo.pause();
++    }
++  }, { threshold: 0.15 });
++
++  visibilityObserver.observe(activeVideo);
++  return activeVersion;
++}
++
++if (typeof document !== "undefined") {
++  setupHeroVariants();
++}
+
+## tests/hero-variants.test.mjs diff
+
+warning: in the working copy of 'tests\hero-variants.test.mjs', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-3-before-hero-variants.test.mjs" "b/tests\\hero-variants.test.mjs"
+index e69de29..4786f01 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-3-before-hero-variants.test.mjs"
++++ "b/tests\\hero-variants.test.mjs"
+@@ -0,0 +1,16 @@
++import test from "node:test";
++import assert from "node:assert/strict";
++import { normalizeHeroVersion } from "../hero-variants.mjs";
++
++test("hero query accepts a, b, and c", () => {
++  assert.equal(normalizeHeroVersion("?hero=a"), "a");
++  assert.equal(normalizeHeroVersion("?hero=b"), "b");
++  assert.equal(normalizeHeroVersion("?hero=c"), "c");
++});
++
++test("hero query defaults unsupported and missing values to a", () => {
++  assert.equal(normalizeHeroVersion(""), "a");
++  assert.equal(normalizeHeroVersion("?hero=z"), "a");
++  assert.equal(normalizeHeroVersion("?other=b"), "a");
++  assert.equal(normalizeHeroVersion("?hero=B"), "a");
++});
+
+## tests/site.test.mjs diff
+
+warning: in the working copy of '.superpowers\sdd\snapshots\task-3-before-site.test.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests\site.test.mjs', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-3-before-site.test.mjs" "b/tests\\site.test.mjs"
+index 5b594fa..f96a81b 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-3-before-site.test.mjs"
++++ "b/tests\\site.test.mjs"
+@@ -209,26 +209,32 @@ test("styles preserve Level Lab tokens and required responsive states", async ()
+ test("local destination pages are present and return home", async () => {
+   for (const page of ["build.html", "play.html", "sign-in.html"]) {
+     const html = await read(page);
+     assert.match(html, /href="index\.html"/);
+     assert.match(html, /class="placeholder-page"/);
+   }
+ });
+ 
+ test("homepage behavior is progressively enhanced", async () => {
+   const js = await read("script.js");
++  const heroJs = await read("hero-variants.mjs");
+   assert.match(js, /data-scroll-target/);
+   assert.match(js, /prefers-reduced-motion/);
+   assert.match(js, /data-media-fallback/);
+   assert.match(js, /data-theme-toggle/);
+   assert.match(js, /IntersectionObserver/);
+   assert.match(js, /is-loaded/);
++  assert.match(heroJs, /URLSearchParams/);
++  assert.match(heroJs, /data-hero-panel/);
++  assert.match(heroJs, /data-hero-video/);
++  assert.match(heroJs, /IntersectionObserver/);
++  assert.match(heroJs, /prefers-reduced-motion/);
+ });
+ 
+ test("required visual assets are local", async () => {
+   const html = await read("index.html");
+   assert.doesNotMatch(html, /(?:src|poster)="https?:\/\//);
+   await Promise.all([
+     readFile(resolve(root, "assets/media/background-dark.jpg")),
+     readFile(resolve(root, "assets/media/background-light.jpg")),
+     readFile(resolve(root, "assets/media/welcome.mp4")),
+     readFile(resolve(root, "assets/media/splash-build-1080.mp4")),

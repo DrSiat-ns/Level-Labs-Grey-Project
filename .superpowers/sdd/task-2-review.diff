@@ -1,0 +1,442 @@
+﻿# Task 2 Review Package
+
+Base: pre-task snapshots
+Head: current index.html and styles.css
+
+## index.html diff
+
+warning: in the working copy of '.superpowers\sdd\snapshots\task-2-before-index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-2-before-index.html" b/index.html
+index 9a8cd58..7949efe 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-2-before-index.html"
++++ b/index.html
+@@ -6,57 +6,93 @@
+     <meta name="description" content="Level Lab is an online platform where you can build, play, grow, and create safely.">
+     <title>Level Lab</title>
+     <link rel="stylesheet" href="styles.css">
+   </head>
+   <body id="top">
+     <a class="skip-link" href="#main">Skip to main content</a>
+ 
+     <header class="panel-menu" id="app-header">
+       <div class="panel-left">
+         <nav class="nav-global" aria-label="Primary navigation">
+-          <a class="nav-link active" id="nav-home" href="index.html" aria-current="page">Home</a>
++          <a class="nav-link" id="nav-home" href="index.html">Home</a>
+           <a class="nav-link" id="nav-build" href="build.html">Build</a>
+           <a class="nav-link" id="nav-play" href="play.html">Play</a>
++          <a class="nav-link nav-version active" href="index.html?hero=a" data-hero-version="a" aria-label="Version A" aria-current="page"><span class="version-word">Version </span>A</a>
++          <a class="nav-link nav-version" href="index.html?hero=b" data-hero-version="b" aria-label="Version B"><span class="version-word">Version </span>B</a>
++          <a class="nav-link nav-version" href="index.html?hero=c" data-hero-version="c" aria-label="Version C"><span class="version-word">Version </span>C</a>
+         </nav>
+       </div>
+       <div class="panel-center">
+         <a class="app-name" href="index.html" aria-label="Level Lab home">
+           <img src="assets/icons/level-lab-mark.svg" alt="" width="20" height="20">
+           <span>Level Lab</span>
+         </a>
+       </div>
+       <div class="panel-right">
+         <button class="button button-icon nav-theme" type="button" data-theme-toggle aria-label="Use light theme" title="Use light theme">
+           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+             <circle cx="8" cy="8" r="3.25"></circle>
+             <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05 4.1 4.1M11.9 11.9l1.05 1.05M3.05 12.95 4.1 11.9M11.9 4.1l1.05-1.05"></path>
+           </svg>
+         </button>
+         <a class="button button-accent" href="sign-in.html">Sign In</a>
+       </div>
+     </header>
+ 
+     <main class="landing" id="main">
+-      <section class="feature feature-media-left reveal is-visible" id="welcome" aria-labelledby="welcome-title">
+-        <div class="feature-media">
+-          <video class="feature-video" src="assets/media/welcome.mp4" autoplay muted loop playsinline preload="metadata" data-media-fallback></video>
++      <section class="hero-shell reveal is-visible" id="welcome">
++        <div class="hero-variant hero-variant-a" data-hero-panel="a">
++          <div class="hero-copy">
++            <span class="section-eyebrow">Create · Play · Remix</span>
++            <h1 class="hero-title" aria-label="Make a game. Make it yours.">Make a game. <span>Make it yours.</span></h1>
++            <p class="hero-lead">Turn an idea into a playable 3D game, then remix every piece until it feels like you.</p>
++            <div class="hero-actions">
++              <a class="button hero-primary" href="build.html">Start Creating</a>
++              <a class="button hero-secondary" href="play.html" aria-label="Play games">Play</a>
++            </div>
++          </div>
++          <div class="hero-window hero-media">
++            <div class="hero-window-bar"><span></span><span></span><span></span><small>Made in Level Lab</small></div>
++            <video class="hero-video" data-hero-video data-src="assets/media/welcome.mp4" muted loop playsinline preload="none" poster="assets/media/background-dark.jpg" data-media-fallback></video>
++          </div>
+         </div>
+-        <div class="feature-text">
+-          <span class="section-eyebrow">Welcome</span>
+-          <h1 class="feature-title" id="welcome-title">Build. Play. Grow. Trust.</h1>
+-          <p class="feature-lead">Level Lab is an online platform where you can dream up your own games, remix your favorites, and share creations with your friends!</p>
+-          <ul class="pillars">
+-            <li class="pillar"><span class="pillar-label">Build</span> — AI that keeps you in control</li>
+-            <li class="pillar"><span class="pillar-label">Play</span> — Every game is yours to remix</li>
+-            <li class="pillar"><span class="pillar-label">Grow</span> — A low floor and a high ceiling</li>
+-            <li class="pillar"><span class="pillar-label">Trust</span> — Safety built in, not patched on</li>
+-          </ul>
++
++        <div class="hero-variant hero-variant-b" data-hero-panel="b" hidden>
++          <div class="hero-media hero-canvas">
++            <video class="hero-video" data-hero-video data-src="assets/media/welcome.mp4" muted loop playsinline preload="none" poster="assets/media/background-dark.jpg" data-media-fallback></video>
++          </div>
++          <div class="hero-scrim" aria-hidden="true"></div>
++          <div class="hero-copy">
++            <span class="section-eyebrow">Built to be played</span>
++            <h1 class="hero-title" aria-label="Your idea. Playable in minutes.">Your idea. <span>Playable in minutes.</span></h1>
++            <p class="hero-lead">Create, play, and remix directly in your browser.</p>
++            <div class="hero-actions">
++              <a class="button hero-primary" href="build.html">Start Creating</a>
++              <a class="button hero-secondary" href="play.html" aria-label="Play games">Play</a>
++            </div>
++          </div>
++        </div>
++
++        <div class="hero-variant hero-variant-c" data-hero-panel="c" hidden>
++          <div class="hero-copy">
++            <span class="section-eyebrow">No download. No black box.</span>
++            <h1 class="hero-title" aria-label="Imagine it. Build it. Remix everything.">Imagine it. Build it. <span>Remix everything.</span></h1>
++            <p class="hero-lead">A real game-making workspace that grows with every idea.</p>
++            <div class="hero-actions">
++              <a class="button hero-primary" href="build.html">Start Creating</a>
++              <a class="button hero-secondary" href="play.html" aria-label="Play games">Play</a>
++            </div>
++          </div>
++          <div class="hero-reveal hero-media">
++            <span class="hero-reveal-label">Inside Level Lab</span>
++            <video class="hero-video" data-hero-video data-src="assets/media/welcome.mp4" muted loop playsinline preload="none" poster="assets/media/background-dark.jpg" data-media-fallback></video>
++          </div>
+         </div>
+         <a class="grid-more" href="#build" data-scroll-target="build">
+           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 6 8 10 12 6"></polyline></svg>
+           <span>Scroll to Learn More</span>
+         </a>
+       </section>
+ 
+       <section class="feature reveal" id="build" aria-labelledby="build-title">
+         <div class="feature-text">
+           <span class="section-eyebrow">Build</span>
+@@ -149,12 +185,13 @@
+         <div class="footer-social" aria-label="Level Lab social media">
+           <a href="https://www.tiktok.com/@levellabinc" aria-label="Level Lab on TikTok"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg></a>
+           <a href="https://www.instagram.com/levellabinc" aria-label="Level Lab on Instagram"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="4"></rect><circle cx="8" cy="8" r="3.25"></circle><circle cx="11.6" cy="4.4" r=".6" fill="currentColor" stroke="none"></circle></svg></a>
+           <a href="https://www.facebook.com/levellabinc" aria-label="Level Lab on Facebook"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M15 8a7 7 0 1 0-8.1 6.9v-4.88H5.13V8H6.9V6.47c0-1.75 1.04-2.72 2.64-2.72.76 0 1.56.14 1.56.14v1.72h-.88c-.87 0-1.14.54-1.14 1.09V8h1.94l-.31 2.02H9.08v4.88A7 7 0 0 0 15 8z"></path></svg></a>
+           <a href="https://www.youtube.com/@LevelLabInc" aria-label="Level Lab on YouTube"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="3.5" width="14" height="9" rx="2.5"></rect><path d="m6.75 6 3.75 2-3.75 2z" fill="currentColor" stroke="none"></path></svg></a>
+         </div>
+       </footer>
+     </main>
+ 
+     <script src="script.js"></script>
++    <script type="module" src="hero-variants.mjs"></script>
+   </body>
+ </html>
+
+## styles.css diff
+
+warning: in the working copy of '.superpowers\sdd\snapshots\task-2-before-styles.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'styles.css', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-2-before-styles.css" b/styles.css
+index 127b4b8..a9b630f 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-2-before-styles.css"
++++ b/styles.css
+@@ -96,51 +96,296 @@ body {
+   padding: 50px;
+   border: 1px solid var(--color-border);
+   border-radius: 10px;
+   background: var(--color-surface);
+ }
+ 
+ .placeholder-page__content .app-name {
+   margin-bottom: 75px;
+ }
+ 
++:root {
++  --color-accent-action: #0068e6;
++}
++
++.nav-version {
++  min-height: 44px;
++}
++
++.hero-shell {
++  position: relative;
++  width: 100%;
++  max-width: var(--width-content);
++  min-height: clamp(500px, calc(100dvh - var(--height-header) - var(--height-footer) - 120px), 680px);
++  margin: 0 auto;
++  overflow: hidden;
++  border-radius: var(--radius-lg);
++  background: var(--color-background);
++}
++
++.hero-variant {
++  position: absolute;
++  inset: 0;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  overflow: hidden;
++}
++
++.hero-variant[hidden] {
++  display: none;
++}
++
++.hero-copy {
++  position: relative;
++  z-index: 3;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  width: min(100% - 40px, 820px);
++  padding-top: clamp(45px, 8vh, 85px);
++  text-align: center;
++}
++
++.hero-title {
++  margin: 0;
++  color: var(--color-text);
++  font-size: clamp(38px, 6vw, 72px);
++  line-height: 1.02;
++  font-weight: var(--font-weight-bold);
++  letter-spacing: 0;
++}
++
++.hero-title span {
++  color: var(--color-accent-text);
++}
++
++.hero-lead {
++  max-width: 680px;
++  margin: var(--space-3) 0 0;
++  color: var(--color-text-dark);
++  font-size: 18px;
++  line-height: 1.55;
++}
++
++.hero-actions {
++  display: flex;
++  gap: var(--space-2);
++  margin-top: var(--space-4);
++}
++
++.hero-actions .button {
++  min-width: 150px;
++  height: 44px;
++  padding: 0 var(--space-4);
++  font-weight: var(--font-weight-bold);
++}
++
++.hero-primary {
++  border-color: var(--color-accent-action);
++  background: var(--color-accent-action);
++  color: #ffffff;
++}
++
++.hero-secondary {
++  gap: var(--space-2);
++  border-color: var(--color-border-light);
++  background: var(--color-surface);
++  color: var(--color-text);
++}
++
++.hero-media {
++  overflow: hidden;
++  background: var(--color-surface);
++}
++
++.hero-video {
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++}
++
++.hero-window {
++  position: absolute;
++  right: max(25px, 7%);
++  bottom: -90px;
++  left: max(25px, 7%);
++  z-index: 2;
++  height: 260px;
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
++}
++
++.hero-window-bar {
++  display: flex;
++  align-items: center;
++  gap: var(--space-1);
++  height: 30px;
++  padding: 0 var(--space-3);
++  border-bottom: 1px solid var(--color-border);
++  background: var(--color-surface);
++}
++
++.hero-window-bar > span {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: var(--color-mid);
++}
++
++.hero-window-bar small {
++  margin-left: auto;
++  color: var(--color-text-dark);
++}
++
++.hero-window .hero-video {
++  height: calc(100% - 30px);
++}
++
++.hero-canvas,
++.hero-scrim {
++  position: absolute;
++  inset: 0;
++}
++
++.hero-scrim {
++  z-index: 1;
++  background: rgba(15, 15, 15, 0.66);
++}
++
++.hero-variant-b {
++  justify-content: flex-end;
++}
++
++.hero-variant-b .hero-copy {
++  justify-content: flex-end;
++  min-height: 100%;
++  padding-bottom: clamp(45px, 8vh, 80px);
++}
++
++.hero-variant-b .hero-lead {
++  color: var(--color-text);
++}
++
++.hero-variant-c .hero-copy {
++  padding-top: clamp(35px, 6vh, 65px);
++}
++
++.hero-reveal {
++  position: absolute;
++  right: 0;
++  bottom: -35px;
++  left: 0;
++  z-index: 2;
++  height: 42%;
++  border-top: 1px solid var(--color-border);
++}
++
++.hero-reveal-label {
++  position: absolute;
++  top: var(--space-3);
++  left: var(--space-3);
++  z-index: 1;
++  padding: var(--space-2);
++  border: 1px solid var(--color-border-light);
++  border-radius: var(--radius-sm);
++  background: color-mix(in srgb, var(--color-background) 85%, transparent);
++  color: var(--color-text);
++  font-size: var(--font-size-sm);
++  font-weight: var(--font-weight-bold);
++}
++
+ @media (max-width: 768px) {
+   .panel-menu {
+     min-width: 0;
+   }
+ 
+   .panel-menu .panel-left,
+   .panel-menu .panel-right {
+     min-width: 0;
+   }
+ 
+   .nav-global {
+-    gap: 15px;
++    gap: var(--space-2);
++  }
++
++  .version-word {
++    display: none;
++  }
++
++  .panel-center .app-name > span {
++    display: none;
++  }
++
++  .nav-version {
++    min-width: 28px;
++    justify-content: center;
++  }
++
++  .hero-shell {
++    min-height: min(560px, calc(100dvh - var(--height-header) - 55px));
++  }
++
++  .hero-copy {
++    width: min(100% - 30px, 680px);
++    padding-top: 35px;
++  }
++
++  .hero-title {
++    font-size: clamp(34px, 11vw, 48px);
++  }
++
++  .hero-lead {
++    font-size: 16px;
++  }
++
++  .hero-actions {
++    width: 100%;
++  }
++
++  .hero-actions .button {
++    flex: 1;
++    min-width: 0;
++  }
++
++  .hero-window {
++    right: 15px;
++    bottom: -65px;
++    left: 15px;
++    height: 205px;
++  }
++
++  .hero-reveal {
++    height: 34%;
+   }
+ 
+   .panel-right .button-accent {
+     display: none;
+   }
+ 
+   .feature-title,
+   .feature-lead,
+   .step,
+   .flip-copy {
+     overflow-wrap: anywhere;
+   }
+ 
+   .placeholder-page__content {
+     padding: 30px;
+   }
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
++  .hero-video {
++    display: block;
++  }
++
+   html {
+     scroll-behavior: auto;
+   }
+ 
+   *,
+   *::before,
+   *::after {
+     scroll-behavior: auto !important;
+     animation-duration: 0.01ms !important;
+     animation-iteration-count: 1 !important;

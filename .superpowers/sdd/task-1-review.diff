@@ -1,0 +1,103 @@
+﻿# Task 1 Review Package
+
+Base: pre-task snapshot
+Head: current tests/site.test.mjs
+
+## Diff
+
+warning: in the working copy of '.superpowers\sdd\snapshots\task-1-before-site.test.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests\site.test.mjs', LF will be replaced by CRLF the next time Git touches it
+diff --git "a/.superpowers\\sdd\\snapshots\\task-1-before-site.test.mjs" "b/tests\\site.test.mjs"
+index a6fdb1b..35aace4 100644
+--- "a/.superpowers\\sdd\\snapshots\\task-1-before-site.test.mjs"
++++ "b/tests\\site.test.mjs"
+@@ -13,47 +13,88 @@ test("the homepage is a self-contained static entry point", async () => {
+   assert.match(html, /<script[^>]+src="script\.js"/);
+   assert.doesNotMatch(html, /(?:src|href)="\/(?!\/)/);
+ });
+ 
+ test("homepage preserves the staging information architecture", async () => {
+   const html = await read("index.html");
+   for (const id of ["welcome", "build", "play", "learn", "safety"]) {
+     assert.match(html, new RegExp(`id="${id}"`));
+   }
+   for (const heading of [
+-    "Build. Play. Grow. Trust.",
++    "Make a game. Make it yours.",
++    "Your idea. Playable in minutes.",
++    "Imagine it. Build it. Remix everything.",
+     "Build the experience",
+     "Play is just the beginning",
+     "Games grow. So do you.",
+     "Safe by design",
+   ]) {
+     assert.ok(html.includes(heading), `missing heading: ${heading}`);
+   }
+ });
+ 
++test("homepage exposes three shareable hero versions and defaults to A", async () => {
++  const html = await read("index.html");
++  const orderedLinks = [
++    'id="nav-play"',
++    'href="index.html?hero=a"',
++    'href="index.html?hero=b"',
++    'href="index.html?hero=c"',
++  ];
++  let previousIndex = -1;
++  for (const fragment of orderedLinks) {
++    const currentIndex = html.indexOf(fragment);
++    assert.ok(currentIndex > previousIndex, `navigation fragment out of order: ${fragment}`);
++    previousIndex = currentIndex;
++  }
++
++  assert.match(html, /data-hero-panel="a"(?![^>]*hidden)/);
++  assert.match(html, /data-hero-panel="b"[^>]*hidden/);
++  assert.match(html, /data-hero-panel="c"[^>]*hidden/);
++  assert.equal((html.match(/data-hero-video/g) || []).length, 3);
++  assert.equal((html.match(/data-src="assets\/media\/welcome\.mp4"/g) || []).length, 3);
++  assert.doesNotMatch(html, /data-hero-video[^>]*\ssrc=/);
++  assert.match(html, /<script type="module" src="hero-variants\.mjs"><\/script>/);
++});
++
++test("each hero version keeps the approved actions and accessible labels", async () => {
++  const html = await read("index.html");
++  assert.equal((html.match(/>Start Creating<\/a>/g) || []).length, 3);
++  assert.equal((html.match(/aria-label="Play games"/g) || []).length, 3);
++  assert.equal((html.match(/href="build\.html"/g) || []).length >= 4, true);
++  assert.equal((html.match(/href="play\.html"/g) || []).length >= 4, true);
++  for (const version of ["A", "B", "C"]) {
++    assert.ok(html.includes(`aria-label="Version ${version}"`));
++    assert.ok(html.includes(`<span class="version-word">Version </span>${version}`));
++  }
++});
++
+ test("primary actions use local destinations", async () => {
+   const html = await read("index.html");
+   assert.match(html, /href="build\.html"/);
+   assert.match(html, /href="play\.html"/);
+   assert.match(html, /href="sign-in\.html"/);
+   assert.match(html, /href="#build"[^>]*data-scroll-target="build"/);
+ });
+ 
+ test("styles preserve Level Lab tokens and required responsive states", async () => {
+   const css = await read("styles.css");
+   for (const value of ["#1a1a1a", "#252525", "#3a3a3a", "#e5e5e5", "#0077ff"]) {
+     assert.ok(css.includes(value), `missing Level Lab color ${value}`);
+   }
+   assert.match(css, /--grid-unit:\s*5px/);
+   assert.match(css, /@media\s*\(max-width:\s*768px\)/);
+   assert.match(css, /prefers-reduced-motion:\s*reduce/);
+   assert.match(css, /:focus-visible/);
++  assert.match(css, /\.nav-version\s*\{[^}]*min-height:\s*44px/s);
++  assert.match(css, /\.hero-actions \.button\s*\{[^}]*height:\s*44px/s);
++  assert.match(css, /\.version-word\s*\{[^}]*display:\s*none/s);
+ });
+ 
+ test("local destination pages are present and return home", async () => {
+   for (const page of ["build.html", "play.html", "sign-in.html"]) {
+     const html = await read(page);
+     assert.match(html, /href="index\.html"/);
+     assert.match(html, /class="placeholder-page"/);
+   }
+ });
+ 

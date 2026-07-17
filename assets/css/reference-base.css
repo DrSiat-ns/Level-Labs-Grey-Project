@@ -1,0 +1,2404 @@
+/* Master Style Sheet */
+/* Studio Design System - 5px grid, right angles, light/dark themes */
+
+/* Note: Roboto font is loaded via <link> in HTML for better Safari compatibility */
+
+/* Core palette (fixed) */
+:root {
+  --color-accent: #0077ff;
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 50%, var(--color-core-lightest));
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 50%, var(--color-core-darkest));
+
+  --color-core-darkest: #1a1a1a;
+  --color-core-darker: #252525;
+  --color-core-dark: #3a3a3a;
+  --color-core-mid: #8c8c8c;
+  --color-core-light: #c5c5c5;
+  --color-core-lighter: #dadada;
+  --color-core-lightest: #e5e5e5;
+
+  --color-error: #ff3366;
+  --color-success: #00cc66;
+  --color-warning: #ff8800;
+
+  /* Generic categorical accents (e.g. for differentiating sections of a
+     visual editor). 100% saturation, mid luminance, spread across the
+     hue wheel so the trio reads as clearly distinct. */
+  --color-variant-1: #00ccdd;
+  --color-variant-2: #bb44ff;
+  --color-variant-3: #ffcc00;
+  /* Mix ratios consumed via color-mix(in srgb, var(--color-variant-N)
+     var(--variant-mix-X), var(--color-Y)) â€” borders read more saturated
+     than text/icons since they're a smaller visual area. */
+  --variant-mix-border: 25%;
+  --variant-mix-text: 10%;
+
+  /* End-state particle palette (read via getComputedStyle by Confetti.js
+     and Rain.js). Defined on :root so play and editor-preview surfaces
+     share one source of truth and stay visually in sync. */
+  --confetti-color-1: #ff5e5e;
+  --confetti-color-2: #ffcc5e;
+  --confetti-color-3: #5eff8d;
+  --confetti-color-4: #5eb6ff;
+  --confetti-color-5: #c25eff;
+  --confetti-color-6: #ff5ed4;
+  --rain-color: rgba(170, 200, 230, 0.6);
+
+  /* Safe area insets for notched devices (iOS, etc.) */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+
+  /* 5px spacing scale: 5px steps up to --space-5 (25px), then 25px steps
+     (--space-10 = 50px, --space-15 = 75px, ...) -- same spirit as the timer
+     rule (fine steps small, coarse steps large). No --space-6 through -9. */
+  --grid-unit: 5px;
+  --space-1: calc(var(--grid-unit) * 1);
+  --space-2: calc(var(--grid-unit) * 2);
+  --space-3: calc(var(--grid-unit) * 3);
+  --space-4: calc(var(--grid-unit) * 4);
+  --space-5: calc(var(--grid-unit) * 5);
+  --space-10: calc(var(--grid-unit) * 10);
+
+  /* Content rhythm -- the single gap the sectioned pages run on: the page
+     inset, the gaps between section panels, the panels' internal padding,
+     and the feature column gap. Consume via --content-gap, which resolves
+     to the large step on desktop and the small step at or under 1024px
+     wide (flipped below the :root block). */
+  --content-gap-sm: var(--space-5);
+  --content-gap-lg: var(--space-10);
+  --content-gap: var(--content-gap-lg);
+
+  /* Standard heights */
+  --height-header: 50px;
+  --height-footer: 40px;
+  --height-input: 34px;
+
+  /* Standard widths */
+  --width-panel-default: 300px; /* Default width for side panels */
+  --width-page-min: 380px; /* Minimum page width before overflow */
+  --width-content: 1400px; /* Universal max content width (features, sections, banners) */
+  --width-prose-center: 720px; /* Readable line length for centered section intros */
+
+  /* Typography */
+  --font-family: 'Roboto', sans-serif;
+  --font-family-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
+  --font-weight: 300;
+  --font-weight-bold: 700;
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 32px;
+  --font-size-display: clamp(28px, 4vw, 44px); /* Fluid section-title size */
+
+  /* Layout */
+  --border-width: 1px;
+  --border-style: solid;
+
+  /* Corner radius, rounded throughout on the 5px grid: --radius-sm (5px) for
+     smaller elements (buttons, inputs, chips, controls, banners); --radius-lg
+     (10px) for larger ones (cards, tiles, media, modals). For corners that
+     must stay square, use a literal 0. */
+  --radius-sm: 5px;
+  --radius-lg: 10px;
+
+  /* Overlay colors (for modals, backgrounds) */
+  /* Exception: using CSS color keywords for true black/white overlays */
+  --overlay-black-50: color-mix(in srgb, black 50%, transparent);
+  --overlay-black-75: color-mix(in srgb, black 75%, transparent);
+  --overlay-white-10: color-mix(in srgb, white 10%, transparent);
+  --overlay-white-15: color-mix(in srgb, white 15%, transparent);
+  --overlay-white-20: color-mix(in srgb, white 20%, transparent);
+  --overlay-white-25: color-mix(in srgb, white 25%, transparent);
+  --overlay-white-40: color-mix(in srgb, white 40%, transparent);
+  --overlay-white-50: color-mix(in srgb, white 50%, transparent);
+  --overlay-white-75: color-mix(in srgb, white 75%, transparent);
+
+  /* Shadows */
+  --shadow-text: 0 1px 3px var(--overlay-black-75);
+  --shadow-drop: 0 4px 8px var(--overlay-black-50);
+}
+
+/* Content rhythm flip (see the token definitions above): viewports at or
+   under 1024px wide run on the small step. Width-based only --
+   short-but-wide viewports keep the desktop rhythm. */
+@media (max-width: 1024px) {
+  :root {
+    --content-gap: var(--content-gap-sm);
+  }
+}
+
+/* Dark Theme (default). Light theme below; both map the same Core ramp onto the
+   Theme tier, so flipping data-theme on <html> reflows the whole app -- this is
+   the single switch point (see the three-tier color note above). */
+:root[data-theme='dark'] {
+  --color-background: var(--color-core-darkest);
+  --color-surface: var(--color-core-darker);
+  --color-surface-light: var(--color-core-dark);
+  --color-text: var(--color-core-lightest);
+  --color-text-dark: var(--color-core-light);
+  --font-color: var(--color-text);
+  --color-border: var(--color-core-dark);
+  --color-border-light: var(--color-core-mid);
+  --border-color: var(--color-border);
+  --color-link: var(--color-core-mid);
+  --color-link-light: var(--color-core-lighter);
+  --focus-outline: var(--border-width) var(--border-style) var(--color-accent);
+  /* Accent-colored TEXT on page surfaces (eyebrows, etc.): the accent
+     variant with readable contrast against this theme's backgrounds --
+     the fixed mid accent passes on neither. */
+  --color-accent-text: var(--color-accent-light);
+  color-scheme: dark;
+}
+
+/* Light Theme -- the Core ramp read from the opposite end (lightest surfaces,
+   darkest text). Mirrors the dark block token-for-token so every component that
+   uses the Theme tier flips cleanly; link-light darkens (toward core-darker)
+   rather than lightens, so links still deepen on hover against light surfaces. */
+:root[data-theme='light'] {
+  --color-background: var(--color-core-lightest);
+  --color-surface: var(--color-core-lighter);
+  --color-surface-light: var(--color-core-light);
+  --color-text: var(--color-core-darkest);
+  --color-text-dark: var(--color-core-dark);
+  --font-color: var(--color-text);
+  --color-border: var(--color-core-light);
+  --color-border-light: var(--color-core-mid);
+  --border-color: var(--color-border);
+  --color-link: var(--color-core-mid);
+  --color-link-light: var(--color-core-darker);
+  --focus-outline: var(--border-width) var(--border-style) var(--color-accent);
+  /* See the dark block: readable accent text flips to the dark variant
+     against light surfaces. */
+  --color-accent-text: var(--color-accent-dark);
+  color-scheme: light;
+}
+
+/* Base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  background: var(--color-background); /* Safe area background color */
+}
+
+body {
+  height: 100%;
+}
+
+body,
+p {
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight);
+  color: var(--font-color);
+  background: var(--color-background);
+  line-height: 1.5;
+}
+
+/* Cross-document view transitions: pages opt in per-file via
+   `@view-transition { navigation: auto }` (currently index <-> games). These
+   rules give any such navigation a 0.5s cross-fade; reduced motion disables it
+   (see the prefers-reduced-motion block below). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+}
+
+strong,
+b {
+  font-weight: var(--font-weight-bold);
+}
+
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Layout utilities */
+.flex {
+  display: flex;
+}
+.grid {
+  display: grid;
+}
+
+/* Page shell: the scrollable region between the fixed header and footer, with
+   safe-area padding. Shared by home/profile/admin (play has its own canvas
+   layout and does not use these). */
+.main-content {
+  position: relative; /* Create stacking context above body::before */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Required for flex child overflow to work */
+  margin-top: calc(var(--height-header) + var(--safe-area-top)); /* Space for fixed header */
+  margin-bottom: calc(var(--height-footer) + var(--safe-area-bottom)); /* Space for fixed footer */
+  padding: var(--space-4);
+  padding-left: calc(var(--space-4) + var(--safe-area-left));
+  padding-right: calc(var(--space-4) + var(--safe-area-right));
+  background: transparent;
+  overflow-y: auto;
+}
+
+/* Centered content column inside the page shell. */
+.content-view {
+  max-width: var(--width-content);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+p {
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Field label that reads like a legal-modal section heading (.markdown-body h2). */
+.modal-part-field-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+}
+
+.muted {
+  color: var(--color-text-dark);
+}
+
+/* Button styles */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  height: var(--height-input);
+}
+
+@media (hover: hover) {
+  .button:hover {
+    background: var(--color-background);
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+}
+
+.button:active {
+  background: var(--color-surface);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-accent {
+  background: var(--color-accent);
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+@media (hover: hover) {
+  .button-accent:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+  }
+}
+
+/* Notice Banner: reusable message banner (currently the beta notice on home, profile, play) */
+.notice-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-left: 3px var(--border-style) var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .notice-banner:hover {
+    border-color: var(--color-accent);
+    background: var(--color-surface-light);
+  }
+}
+
+.notice-banner-text {
+  flex: 1;
+}
+
+.notice-banner-cta {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .notice-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+}
+
+/* Square buttons (for toolbars with icon-only content) */
+.button-square {
+  width: var(--height-input);
+  padding: var(--space-1);
+}
+
+/* Icon-only buttons (no background/border) */
+.button-icon {
+  background: transparent;
+  border: none;
+  color: var(--color-link);
+}
+
+@media (hover: hover) {
+  .button-icon:hover {
+    background: transparent;
+    color: var(--color-link-light);
+  }
+}
+
+.button-icon.active {
+  color: var(--color-link-light);
+}
+
+.button-icon:disabled {
+  background: transparent;
+  color: color-mix(in srgb, var(--color-link) 50%, transparent);
+}
+
+@media (hover: hover) {
+  .button-icon:disabled:hover {
+    background: transparent;
+    color: color-mix(in srgb, var(--color-link) 50%, transparent);
+  }
+}
+
+/* Bare icon-button base: transparent, borderless, centered, with a color-only
+   transition. Worn in markup as `class="button-bare button-bare-inst-<name>"`;
+   each instance adds its own size/color/position deltas in its own file. Shared
+   by the build asset-panel icon buttons and several cross-page ones. (Distinct
+   from .button-icon, which is link-colored and rides the .button base.) */
+.button-bare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+/* Container for groups of buttons */
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Build ("new") icon: the '+' inside the square pulses between the inherited
+   icon color (currentColor) and --color-accent-light to draw the eye. The
+   square keeps currentColor and stays static. */
+@keyframes build-plus-pulse {
+  from {
+    stroke: currentColor;
+  }
+  to {
+    stroke: var(--color-accent-light);
+  }
+}
+
+.icon-build-plus {
+  animation: build-plus-pulse 1s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-build-plus {
+    animation: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Container for groups of icon-only buttons (no gap) */
+.buttons-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* Input styles */
+.form-input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  background: var(--color-background);
+  color: var(--color-text);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  color-scheme: dark light;
+}
+
+.form-input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.form-input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-dark);
+}
+
+/* Date input calendar icon styling */
+input[type='date'] {
+  color-scheme: dark;
+}
+
+/* Number fields: hide the native steppers at rest and reveal them on hover or
+   focus, for every number input (this used to be build-only). color-scheme draws
+   the arrows light on the dark fill when shown. Same approach as the date input
+   above -- a type-specific native-control normalization, so the attribute
+   selector is fine. */
+input[type='number'] {
+  color-scheme: dark;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  opacity: 0;
+  cursor: pointer;
+}
+
+input[type='number']:hover::-webkit-inner-spin-button,
+input[type='number']:focus::-webkit-inner-spin-button,
+input[type='number']:hover::-webkit-outer-spin-button,
+input[type='number']:focus::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* Base checkbox / radio sizing + accent. Applied as an explicit class
+   (not a global element/attribute selector) so per-context classes
+   like .param-checkbox can override properties such as margin without
+   needing to escalate specificity. Margin is zeroed so inputs sit flush
+   against their parent (e.g. exactly --space-2 from the left edge of a
+   modal in the buttonBarLeading slot). */
+.form-checkbox,
+.form-radio {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.form-checkbox:disabled,
+.form-radio:disabled {
+  cursor: not-allowed;
+}
+
+/* Inline checkbox + label row (e.g. "Transparent background",
+   "Keep Private", "Random"). The .modal-part-bar-checkbox modifier in
+   common/Modal.css adds vertical centering for the button-bar slot. */
+.form-part-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-part-checkbox-row:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Container styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* Links */
+a.link,
+button.link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-link);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.25s ease;
+}
+
+a.link:hover,
+button.link:hover {
+  text-decoration-color: var(--color-link-light);
+}
+
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 0;
+}
+
+/* Utility classes */
+.text-dark {
+  color: var(--color-text-dark);
+}
+.border {
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* Custom scrollbar */
+/* Firefox */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface-light) var(--color-surface);
+  }
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: var(--space-3);
+  height: var(--space-3);
+}
+
+::-webkit-scrollbar-track:vertical {
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+}
+
+::-webkit-scrollbar-track:horizontal {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-light);
+  background-clip: padding-box;
+  border: var(--space-1) solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+  background-clip: padding-box;
+}
+
+/* Custom resize grip for textareas. The look adapts to which scrollbars
+   are visible (toggle .has-scroll-h / .has-scroll-v from JS, e.g. via
+   UtilsView.trackScrollClasses):
+   - none:       triangular fill -- lower-right surface, upper-left
+                 background (matches the content area)
+   - horiz only: full surface fill + top border separator
+   - vert only:  full surface fill + left border separator
+   - both:       full surface fill + 1px corner pixel where the missing
+                 top/left borders would have met
+   Two diagonal grip lines always overlay the fill. The textarea's
+   scrollbar-corner is overridden to --color-background so the resizer's
+   transparent upper-left half (no-scroll case) blends into the content.
+   --grip-line cascades into --grip-lines, so the :hover override only
+   needs to redefine that one color variable. */
+textarea::-webkit-scrollbar-corner {
+  background: var(--color-background);
+}
+
+textarea::-webkit-resizer {
+  --grip-line: var(--color-border);
+  --grip-lines: linear-gradient(
+    -45deg,
+    transparent 23%,
+    var(--grip-line) 23% 29%,
+    transparent 29% 47%,
+    var(--grip-line) 47% 53%,
+    transparent 53%
+  );
+  background-color: transparent;
+  background-image:
+    var(--grip-lines), linear-gradient(-45deg, var(--color-surface) 50%, transparent 50%);
+}
+
+textarea::-webkit-resizer:hover {
+  --grip-line: var(--color-border-light);
+}
+
+textarea.has-scroll-h::-webkit-resizer,
+textarea.has-scroll-v::-webkit-resizer {
+  background-color: var(--color-surface);
+  background-image: var(--grip-lines);
+}
+
+textarea.has-scroll-h:not(.has-scroll-v)::-webkit-resizer {
+  border-top: 1px solid var(--color-border);
+}
+
+textarea.has-scroll-v:not(.has-scroll-h)::-webkit-resizer {
+  border-left: 1px solid var(--color-border);
+}
+
+textarea.has-scroll-h.has-scroll-v::-webkit-resizer {
+  background-image: linear-gradient(var(--grip-line), var(--grip-line)), var(--grip-lines);
+  background-position:
+    top left,
+    0 0;
+  background-size:
+    1px 1px,
+    auto;
+  background-repeat: no-repeat;
+}
+
+/* Modal/Dialog System */
+.modal-part-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-black-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal {
+  position: relative;
+  background: var(--color-background);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-lg);
+  /* Clip the full-bleed header (negative margin) to the rounded corners. */
+  overflow: hidden;
+  padding: var(--space-2);
+  width: 400px;
+  min-width: calc(var(--width-page-min) - var(--space-2) * 2);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: slideUp 0.2s ease;
+  color: var(--color-text-dark);
+}
+
+.modal-part-header {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  background: var(--color-surface);
+  margin: calc(-1 * var(--space-2));
+  margin-bottom: 0;
+  padding: var(--space-2);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border);
+}
+
+.modal-part-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+  overflow-y: auto;
+  margin-right: calc(-1 * var(--space-2));
+  margin-top: calc(-1 * var(--space-2));
+  margin-bottom: calc(-1 * var(--space-2));
+  padding-right: var(--space-2);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.modal-part-content:has(+ .modal-part-buttons) {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.modal-part-content:has(+ .modal-part-buttons)::-webkit-scrollbar-track {
+  border-bottom: var(--border-width) var(--border-style) var(--color-border);
+}
+
+.modal-part-list {
+  margin: var(--space-2) 0;
+  padding: var(--space-2);
+  max-height: calc(400px - var(--space-2) * 2);
+  overflow-y: auto;
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+}
+
+.modal-part-buttons {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* Modal Variants */
+.modal-loading {
+  min-width: 300px;
+  text-align: center;
+}
+
+.modal-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  /* No padding - relies on .modal-part-content wrapper */
+}
+
+.modal-choice-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modal-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modal-choice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.modal-choice-btn:hover {
+  background: var(--color-background);
+  border-color: var(--color-accent);
+}
+
+.modal-choice-btn.danger:hover {
+  border-color: var(--color-error);
+}
+
+.modal-choice-label {
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.modal-choice-btn.danger .modal-choice-label {
+  color: var(--color-error);
+}
+
+.modal-choice-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark);
+}
+
+/* Scroll Region - inset scrollable container */
+.scroll-region {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-2);
+  background: var(--color-background);
+  border: var(--border-width) var(--border-style) var(--color-border);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Hamburger menu (build's editor toolbar): icon row hides / button shows at
+   â‰¤768px. Keep the breakpoint in sync with the matchMedia query in build.js. */
+.hamburger-button {
+  display: none;
+}
+
+.menu-inst-hamburger {
+  top: 100%;
+  left: 0;
+}
+
+/* Header dropdowns drop straight down from the bar above them: square the top
+   corners so the menu meets the bar flush, round only the bottom. The compound
+   selector beats the .menu base radius by specificity, regardless of order. */
+.menu.menu-inst-hamburger,
+.menu.menu-inst-import-export {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+@media (max-width: 768px) {
+  .hamburger-button {
+    display: flex;
+  }
+
+  .buttons-desktop {
+    display: none !important;
+  }
+}
+
+/* Menu styles - reusable popup/dropdown menus */
+.menu {
+  position: absolute;
+  background: var(--color-surface);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  /* Clip the item hover/active fills to the rounded corners. */
+  overflow: hidden;
+  min-width: 150px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.menu.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.menu-part-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.menu-part-item:hover {
+  background: var(--color-surface-light);
+}
+
+.menu-part-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menu-part-item:disabled:hover {
+  background: transparent;
+}
+
+.menu-part-item svg {
+  flex-shrink: 0;
+  color: var(--color-text-dark);
+}
+
+.menu-part-item:hover svg {
+  color: var(--color-text);
+}
+
+.menu-part-item.danger {
+  color: var(--color-error);
+}
+
+.menu-part-item.danger svg {
+  color: var(--color-error);
+}
+
+.menu-part-item.danger:hover svg {
+  color: var(--color-error);
+}
+
+.menu-part-divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Menu Secondary - smaller text and icons for home page, assets panel */
+.menu-sm .menu-part-item {
+  font-size: var(--font-size-sm);
+}
+
+.menu-sm .menu-part-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Expandable Section Component
+   Animated expand/collapse sections using CSS Grid.
+   Base styles shared across home page and build panels. */
+
+.expandable {
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  position: relative;
+  /* Clip the header/content fills to the rounded corners -- works collapsed
+     (header only) and expanded (header top + content bottom). */
+  overflow: hidden;
+}
+
+.expandable-part-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  height: 40px;
+}
+
+.expandable-part-header:hover {
+  background: var(--color-surface-light);
+}
+
+.expandable-part-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+/* Safari/iOS requires explicit SVG dimensions - viewBox alone is insufficient */
+.expandable-part-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.expandable.expanded > .expandable-part-header > .expandable-part-icon {
+  transform: rotate(90deg);
+}
+
+.expandable-part-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.25s ease;
+  background: var(--color-background);
+}
+
+.expandable-part-content-inner {
+  min-height: 0;
+}
+
+.expandable.expanded > .expandable-part-content {
+  grid-template-rows: 1fr;
+  border-top: var(--border-width) var(--border-style) var(--color-border);
+}
+
+/* Tooltip popup (see common/Tooltip.js). A single element appended to
+   <body>, positioned in fixed coordinates next to whichever element is
+   currently hovered. Any element with a `title` attribute gets one
+   automatically â€” no markup changes required. */
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Above the modal overlay (10000) and any popup menus floating above
+     it (10001), so tooltips are always readable on top. */
+  z-index: 10002;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  box-shadow: var(--shadow-drop);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  max-width: 280px;
+  white-space: pre-wrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 250ms ease,
+    visibility 250ms ease;
+}
+
+.tooltip.tooltip-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* State Variations */
+
+/* Disabled states */
+.button:disabled,
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Readonly inputs */
+.form-input:read-only {
+  color: var(--color-text-dark);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading states */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--space-4);
+  height: var(--space-4);
+  margin: calc(var(--space-2) * -1) 0 0 calc(var(--space-2) * -1);
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.loading-bar-container {
+  width: 100%;
+  height: var(--space-2);
+  background: var(--color-surface-light);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.loading-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 0;
+  transition: width 0.2s ease-out;
+}
+
+/* Indeterminate variant: used while the server processes an upload (e.g. GLB
+   pipeline / KTX2 compression) and there is no streamed progress to report.
+   Animates transform (compositor-only) rather than layout properties. */
+.loading-bar-indeterminate {
+  width: 40%;
+  height: 100%;
+  background: var(--color-accent);
+  animation: loading-bar-slide 1.25s ease-in-out infinite;
+}
+
+@keyframes loading-bar-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.loading-bar-status {
+  color: var(--color-text-dark);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-1);
+  text-align: center;
+}
+
+.loading-message {
+  color: var(--color-text-dark);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  gap: var(--space-2);
+}
+
+/* Error states */
+.error {
+  border-color: var(--color-error) !important;
+  color: var(--color-error);
+}
+
+.error-message {
+  color: var(--color-error);
+}
+
+.error-container {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+/* Input error states */
+.form-input-error {
+  border-color: var(--color-error) !important;
+}
+
+.form-input-error:focus {
+  border-color: var(--color-error) !important;
+}
+
+.field-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-1);
+  display: block;
+}
+
+/* Password visibility toggle */
+.password-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--color-text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.password-toggle:hover {
+  color: var(--color-text);
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: var(--color-accent);
+}
+
+/* Success states */
+.success {
+  border-color: var(--color-success) !important;
+  color: var(--color-success);
+}
+
+.success-message {
+  color: var(--color-success);
+}
+
+.success-container {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+/* Warning states */
+.warning {
+  border-color: var(--color-warning) !important;
+  color: var(--color-warning);
+}
+
+.warning-message {
+  color: var(--color-warning);
+}
+
+.warning-container {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+/* ============================================
+   Interactive tiles -- hover affordances
+   ============================================ */
+
+/* Every interactive tile accents its border on hover; the modal picker tiles also
+   lift slightly. ONE gated home for all of it -- the gate matters because iOS
+   fires a "sticky" :hover on whatever tile you touch, so an ungated rule would
+   flash the border/scale as you merely scroll past on a touchscreen. Add a new
+   tile's selector here rather than writing a fresh (easy-to-forget-to-gate)
+   :hover rule in its own stylesheet. (Selectors live in UtilsSection.css,
+   AssetBrowser.css, ModalAccountAvatar.css, ModalSelect.css; style.css loads
+   on every page, so this single rule reaches them all.) */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover,
+  .asset-browser-tile:hover,
+  .avatar-tile:hover,
+  .modal-select-item:hover {
+    border-color: var(--color-accent);
+  }
+
+  .avatar-tile:hover,
+  .modal-select-item:hover {
+    transform: scale(1.02);
+  }
+
+  /* Unpause the tile's orbiting highlight on hover too (the ring + paused sweep
+     live in .project-card::after, UtilsSection.css). Gated here alongside the
+     hover border so a touch tap's sticky :hover can't trigger it. */
+  .project-card:hover:not(.project-card-skeleton)::after {
+    opacity: 1;
+    animation-play-state: running;
+  }
+}
+
+/* ============================================
+   Responsive Breakpoints
+   - Mobile: 768px (tablets and below)
+   - Mini: 480px (small phones)
+   ============================================ */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-2);
+  }
+}
+
+/* Top Panel (shared header) */
+.panel-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  padding-top: calc(var(--space-2) + var(--safe-area-top));
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+  background: var(--color-surface);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border);
+  height: calc(var(--height-header) + var(--safe-area-top));
+  min-width: var(--width-page-min);
+}
+
+.panel-menu .panel-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-start;
+  /* Matches the footer's left padding so the header's first item and the
+     footer's EULA link sit on the same edge. */
+  padding-left: var(--space-3);
+}
+
+@media (max-width: 768px) {
+  /* Build's toolbar only -- it still collapses to a hamburger at this width
+     (the global header, which carries .nav-global, no longer does). The
+     hamburger button carries --space-2 of internal padding, so --space-1
+     outside lands its icon on the same 15px edge as the footer's EULA link.
+     The global header keeps the base --space-3 so its first nav link holds
+     that same edge at every width. */
+  .panel-menu .panel-left:not(:has(.nav-global)) {
+    padding-left: var(--space-1);
+  }
+}
+
+.panel-menu .logo {
+  height: 32px;
+  width: auto;
+}
+
+.panel-menu .panel-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile: only the logomark relocates to the far-left slot. The centered
+   brand un-pins from the middle, rejoins the flow as the first item
+   (order: -1) on the same --space-3 edge as the nav, and drops its "Level
+   Lab" wordmark -- so the regular "Home" nav link stands in beside the logo
+   and the bar reads [logo] Home Build Play. */
+@media (max-width: 768px) {
+  .panel-menu .app-text {
+    display: none;
+  }
+
+  .panel-menu .panel-center {
+    position: static;
+    transform: none;
+    order: -1;
+    padding-left: var(--space-3);
+  }
+}
+
+.panel-menu .panel-right {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  /* Mirrors panel-left / the footer's right padding (same edge as the
+     version link). */
+  padding-right: var(--space-3);
+}
+
+.app-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-lg);
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--color-text-dark);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.app-name:hover,
+.app-name:focus {
+  color: var(--color-text);
+}
+
+.app-name svg {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+
+#auth-buttons .button {
+  height: 34px;
+  padding: var(--space-2);
+  line-height: 1;
+}
+
+/* ============================================
+   Global nav (UtilsHeader.mountGlobal): text links + theme toggle + Profile.
+   Shared so it can be reused across pages; inert without the mountGlobal markup.
+   ============================================ */
+
+.nav-global {
+  display: flex;
+  align-items: center;
+  /* The links carry no horizontal padding, so this gap IS the visible space
+     between neighboring [icon] TEXT units -- one honest token. */
+  gap: var(--space-4);
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* Vertical padding only (hit-target height); horizontal spacing between
+     links belongs to .nav-global's gap alone. */
+  padding: var(--space-1) 0;
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: var(--font-size);
+  color: var(--color-link);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .nav-link:hover {
+    color: var(--color-link-light);
+  }
+}
+
+.nav-link.active {
+  color: var(--color-text);
+}
+
+.nav-theme {
+  margin-right: var(--space-1);
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================
+   Shared section layout -- the landing-style building blocks reused across
+   pages: eyebrow labels, CTA buttons/rows, hairline section separators, and
+   the two-column "feature row" (text beside media/cards, alternating sides,
+   stacking on mobile). Pages add their own media styling (e.g. the landing's
+   video panel, the lab's featured project card).
+   ============================================ */
+
+.section-eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-accent-text);
+  margin-bottom: var(--space-2);
+}
+
+/* Universal CTA placement: a .cta-row always sits --space-4 below whatever
+   content precedes it (lead paragraph, steps list, ...). Pages must wrap CTA
+   buttons in a .cta-row rather than spacing them ad hoc. */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.cta-row-center {
+  justify-content: center;
+}
+
+/* CTAs are taller than the base button and never shrink their label. The
+   min-width keeps paired CTAs rendering the same size. */
+.cta {
+  height: auto;
+  min-width: 150px;
+  padding: var(--space-3);
+  font-size: var(--font-size-lg);
+}
+
+/* Bottom-padding control: a muted chevron + label floated into a panel's
+   bottom padding band, centered. Used by the tile-grid Show More on lab/games
+   (a .project-grid child, anchored via top: 100%; see UtilsSection.css) and
+   the Welcome scroll hint on index (anchored to the panel; see index.css).
+   text-decoration: none lets an <a> wear it as cleanly as a <button>. */
+.grid-more {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: var(--content-gap);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-dark);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.grid-more:hover {
+  color: var(--color-text);
+}
+
+/* The small content gap can't seat the control: at that rhythm (and only
+   there), a panel that carries a .grid-more doubles its bottom padding to make
+   room, and the control's band grows to match. Keyed on the control itself so
+   a panel without one keeps the normal gap. */
+@media (max-width: 1024px) {
+  .feature:has(.grid-more),
+  .section-glass:has(.grid-more) {
+    padding-bottom: calc(2 * var(--content-gap));
+  }
+
+  .grid-more {
+    height: calc(2 * var(--content-gap));
+  }
+}
+
+/* Sectioned scroll page -- the shell shared by the landing page and lab: a
+   single full-bleed <main class="landing"> fixed between the fixed header and
+   footer, so only it scrolls and content never slides under the bars. The
+   page itself doesn't scroll (each page locks html/body overflow). Sections
+   are direct children and self-center via .feature / .section-glass below. */
+/* Landing pages never scroll the document itself -- .landing is the scroll
+   region between the fixed chrome bars. Keyed off the markup so each page
+   doesn't have to re-declare the lock. */
+html:has(body > main.landing),
+body:has(> main.landing) {
+  height: 100%;
+  overflow: hidden;
+}
+
+.landing {
+  position: fixed;
+  top: calc(var(--height-header) + var(--safe-area-top));
+  bottom: calc(var(--height-footer) + var(--safe-area-bottom));
+  left: 0;
+  right: 0;
+  /* Below the universal page minimum the layout holds its shape (matching the
+     shared header/footer) instead of reflowing further. */
+  min-width: var(--width-page-min);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  /* Small breathing room when an anchor jump lands a section at the top
+     (same value as the uniform page inset below). */
+  scroll-padding-top: var(--content-gap);
+  /* The page carries one uniform --content-gap inset on all sides;
+     children center with max-width: var(--width-content) and no padding of
+     their own. Full-bleed exceptions (the in-flow footer) break out with a
+     matching negative margin. Sections space themselves with margin-TOP
+     only (see the glass block below), so the bottom gap above the fixed
+     footer is this padding-bottom alone -- padding is always counted in a
+     scroll container's scrollable overflow (a trailing child's margin is
+     not, in WebKit), so the footer seam survives in every engine.
+     The horizontal insets also carry the landscape safe area (notch /
+     rounded corners) so body content clears the notch the same way the
+     header and footer bars do -- their env() is 0 in portrait and on
+     notchless devices, so this is inert everywhere else. The full-bleed
+     breakout (the in-flow footer) adds the same safe-area term to its
+     negative margin, so its SURFACE still reaches the true screen edge
+     while its content stays inside the safe area. */
+  padding-top: var(--content-gap);
+  padding-bottom: var(--content-gap);
+  padding-left: calc(var(--content-gap) + var(--safe-area-left));
+  padding-right: calc(var(--content-gap) + var(--safe-area-right));
+}
+
+/* Page backdrop: one hand-authored image per theme (any muting/blend is
+   baked into the JPEGs), over the page color in the same layer. Drawn on
+   a viewport-fixed BODY pseudo, not on .landing: it covers once and holds
+   still in both shell modes (background-attachment: fixed can't -- iOS
+   Safari ignores it), and as a child of body rather than the scroller it
+   can never paint over .landing's scrollbar (a fixed child escapes the
+   scroll clip and would cover the gutter). isolation makes body its own
+   stacking context so the z-index: -1 pseudo paints above body's opaque
+   background (which the document-mode chrome derivation needs) instead of
+   falling behind it, while staying under all content. The opaque
+   header/footer bars (z-index: 9999) cover its edges. */
+body:has(> main.landing) {
+  isolation: isolate;
+}
+
+body:has(> main.landing)::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-background) url('../media/background-dark.jpg') center / cover no-repeat;
+}
+
+:root[data-theme='light'] body:has(> main.landing)::before {
+  background-image: url('../media/background-light.jpg');
+}
+
+/* Desktop app-shell only: no rubber-band at the scroll edges -- the
+   overscroll gap paints in the page background, which reads as the chrome
+   bars detaching, so the scroll hard-stops at the boundary instead. Gated
+   to fine pointers because iOS Safari mishandles overscroll-behavior on a
+   scroller inside a scroll-locked body (the first touch gesture gets
+   swallowed entirely, blocking all scrolling); touch devices keep their
+   native scroll physics. Also gated to the shell's viewport range (the
+   exact complement of the document-mode breakpoint below): in document
+   mode the body is a zero-extent overflow-y:auto scroll container, and
+   overscroll-behavior:none on it stops the wheel chain from ever reaching
+   the html scroller -- so a mouse over any content scrolls nothing. These
+   rules are no-ops in the shell anyway (html/body are overflow:hidden; the
+   fixed .landing is the scroller), so scoping them out of document mode
+   costs nothing. */
+@media (hover: hover) and (pointer: fine) and (min-width: 769px) and (min-height: 769px) {
+  html:has(body > main.landing),
+  body:has(> main.landing) {
+    overscroll-behavior: none;
+  }
+
+  .landing {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Universal footer rule: the app-like shell (fixed always-visible footer,
+   inner scroll region) exists only on roomy desktop viewports. On
+   mobile-sized viewports -- EITHER dimension under the 768px breakpoint,
+   so portrait phones qualify too -- the page becomes a normal scrolling
+   DOCUMENT: only document scrolling makes mobile browsers collapse their
+   toolbars and slide the content behind the translucent chrome, edge to
+   edge; a fixed inner scroller can never draw there. The fixed header
+   stays overlaid, and the footer (living INSIDE main.landing, which
+   serves both modes) flows at the very end of the page with no safe-area
+   reservation -- the home indicator floats over its lower edge the same
+   way the clock floats over the header's upper padding. */
+@media (max-height: 768px), (max-width: 768px) {
+  html:has(body > main.landing),
+  body:has(> main.landing) {
+    /* Vertical clearance under the overlaid fixed header. Shared (via
+       inheritance) by the scroll padding and page padding below, so the
+       two can't drift apart. */
+    --clearance-header: calc(var(--height-header) + var(--safe-area-top));
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    /* Anchor jumps land sections below the overlaid fixed header. */
+    scroll-padding-top: calc(var(--clearance-header) + var(--content-gap));
+    /* Browsers derive the backdrop behind their translucent chrome (and
+       past the document's edges) from the html/body background. Surface
+       makes those zones read as the header/footer bars extending; the
+       page background moves onto .landing below, which spans the whole
+       document, so the page itself looks unchanged. */
+    background: var(--color-surface);
+  }
+
+  /* While a modal is open, lock the document scroll behind it. The
+     desktop shell gets this for free from the base html/body lock;
+     keyed off the overlay's DOM presence so it can never stick. */
+  html:has(body > main.landing):has(.modal-part-overlay),
+  body:has(> main.landing):has(.modal-part-overlay) {
+    overflow-y: hidden;
+  }
+
+  .landing {
+    position: static;
+    overflow: visible;
+    /* Sparse pages still fill the screen, with the footer (margin-top:
+       auto below) pinned at the bottom -- otherwise the surface-colored
+       html/body behind would show through below it. Flex changes nothing
+       for the section children: they stretch full-width and self-center
+       exactly as in block flow. */
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    /* Flex margins don't collapse, so the sections' vertical margins would
+       double the rhythm here -- the container's row-gap carries it instead
+       (sections zero their vertical margins below). This also spaces the
+       last section -> footer seam. */
+    row-gap: var(--content-gap);
+    /* The fixed header overlays the flow; clear it (the base padding
+       supplies the other three sides). No background of its own: the page
+       color + backdrop image live on the body::before layer beneath
+       (html/body stay surface for the chrome backdrop; see above), and an
+       opaque background here would cover it. */
+    padding-top: calc(var(--clearance-header) + var(--content-gap));
+  }
+
+  /* The sections' block-flow spacing margins (and the banner's bottom
+     margin) retire in flex here (see the row-gap above); those rules live
+     after the glass panel / banner blocks below -- they must outrank the
+     base declarations by order. */
+
+  .landing .site-footer {
+    position: static;
+    margin-top: auto;
+    /* The base (fixed) footer reserves the bottom safe area inside its
+       height so its links float above the home indicator; in-flow the
+       bar stays slim and the indicator floats over its lower edge
+       instead. */
+    height: var(--height-footer);
+    /* Full-bleed breakout from the page inset: a slim bar flush at the
+       document's end. The
+       horizontal margins clear both the --content-gap inset and the
+       safe-area term now baked into .landing's padding, so the bar's
+       surface reaches the true screen edge (under the notch); the footer's
+       own safe-area padding keeps its links clear. */
+    margin-right: calc(-1 * (var(--content-gap) + var(--safe-area-right)));
+    margin-bottom: calc(-1 * var(--content-gap));
+    margin-left: calc(-1 * (var(--content-gap) + var(--safe-area-left)));
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* Reduced motion: no smooth scrolling on either scroller (the desktop
+   .landing region or the mobile document). Placed after both blocks so
+   it wins their scroll-behavior: smooth. */
+@media (prefers-reduced-motion: reduce) {
+  html:has(body > main.landing),
+  body:has(> main.landing),
+  .landing {
+    scroll-behavior: auto;
+  }
+}
+
+/* A notice banner placed directly in a landing page spans the shared
+   content column, same as the feature rows. */
+.landing > .notice-banner {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-2);
+}
+
+/* Glass section panels -- the universal section treatment on the
+   landing-shell pages: every section sits on a translucent blurred card
+   that lifts its content off the page backdrop, spaced on the
+   --content-gap rhythm (adjacent margins collapse in the desktop shell;
+   document mode swaps them for the .landing row-gap). The cards' borders
+   do the separating -- no hairline separators between sections. Feature
+   rows get the panel implicitly; other sections opt in with
+   .section-glass. */
+.feature,
+.section-glass {
+  /* Explicit width, not just the cap: in document mode the sections are
+     flex items whose auto side margins suppress stretching, so a section
+     with narrow content (e.g. a pre-render skeleton) would shrink-wrap
+     to a sliver of a panel. */
+  width: 100%;
+  max-width: var(--width-content);
+  /* Space sections with margin-TOP only: a trailing margin-bottom would
+     not count in the desktop scroll container's scrollable overflow under
+     WebKit, so the bottom gap rides the .landing padding-bottom instead
+     (see there). Between sections the top margin is the whole gap. */
+  margin: var(--content-gap) auto 0;
+  padding: var(--content-gap);
+  /* Background at partial strength: enough fog for contrast while the
+     backdrop still reads through the blur. */
+  background: color-mix(in srgb, var(--color-background) 50%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* The leading section hugs the page's top inset. .landing already carries a
+   --content-gap padding-top, and its scroll container is a block-formatting
+   context, so a first child's own margin-top would NOT collapse into that
+   padding -- it would stack, doubling the top gap. Drop it. (A notice-banner,
+   when it leads instead, is already margin-top: 0.) */
+.landing > .feature:first-child,
+.landing > .section-glass:first-child {
+  margin-top: 0;
+}
+
+/* Feature row: text column beside a media/card column. */
+.feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Text top-aligns with the media column rather than centering on it.
+     (Rows with a plain media tile switch to stretch below, so the tile can
+     fill the text column's height.) */
+  align-items: start;
+  gap: var(--content-gap);
+}
+
+/* Only rows whose media is a plain .feature-media (the landing feature-row
+   video panels and the profile avatar -- not the content-sized
+   .feature-media-card featured slots) opt into the fill behavior: stretch the
+   columns so the tile fills the row height, and become a query container so
+   the tile can floor its height at a 16:9 box relative to its own column width
+   (cqw) -- see .feature-media below. Scoped with :has() so featured-card rows
+   (games/lab/profile) keep their default start-aligned, content-sized layout. */
+.feature:has(> .feature-media:not(.feature-media-card)) {
+  align-items: stretch;
+  container-type: inline-size;
+}
+
+/* Standard section layout: the two-column top row (L | R) over an optional
+   full-width row. A .feature child marked .feature-row spans both columns and
+   flows onto its own line beneath them. The L/R columns above still reserve
+   their halves when one is empty -- the 1fr tracks hold the space regardless of
+   content -- so a text-left / empty-right head sits over a full-width row. */
+.feature-row {
+  grid-column: 1 / -1;
+}
+
+/* Place a top-row item in the right column, leaving the left reserved empty --
+   the mirror of the default flow, which fills the left first. Returns to normal
+   flow once the feature stacks (see the mobile rule below). */
+.feature-col-right {
+  grid-column: 2;
+}
+
+/* Reveal-on-scroll: sections start faded + lifted and settle as they enter
+   the viewport (.is-visible is added by UtilsSection.js on the content
+   pages, index.js on the landing). Shared by every landing-shell page. */
+.reveal {
+  opacity: 0;
+  transform: translateY(var(--space-4));
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Reduced motion: show sections immediately (the observers also skip
+   straight to .is-visible). */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Document mode: the .landing flex row-gap owns the whole-page rhythm
+   (flex margins don't collapse -- see the shell block above), so the
+   sections' spacing margin-top and the notice banner's margin-bottom both
+   retire. Must sit AFTER their base margin declarations above: same
+   specificity, order decides. */
+@media (max-height: 768px), (max-width: 768px) {
+  .feature,
+  .section-glass {
+    margin-top: 0;
+  }
+  .landing > .notice-banner {
+    margin-bottom: 0;
+  }
+}
+
+/* feature-media-left flips the media column ahead of the text; the default
+   keeps text first, media second. */
+.feature-media-left .feature-media {
+  order: -1;
+}
+
+/* Beside-text media tiles (the landing feature-row video panels and the
+   profile avatar -- plain .feature-media, not the content-sized
+   .feature-media-card) FILL the feature row's height to match the taller text
+   column: the scoped `align-items: stretch` above sizes the tile to the row
+   track and the abs-positioned video/canvas (inset: 0) covers it. A 16:9 FLOOR
+   (below) keeps a tile from getting shorter than its own 16:9 box.
+
+   Height comes from min-height (a definite length), never from a bare
+   aspect-ratio on the tile: iOS Safari collapses a stretched box whose only
+   child is absolutely positioned to zero height, so an aspect-ratio-only tile
+   renders empty there. min-height sidesteps that at every breakpoint. */
+
+/* 16:9 FLOOR (never shorter than 16:9): the tile fills the text column's height
+   and may grow taller (thinner) than 16:9, but min-height keeps it at least its
+   own 16:9 box tall, so it can never get shorter than 16:9. 100cqw is
+   .feature's content width; a 1fr column is (100cqw - gap) / 2 wide, and the
+   3-col identity row is (100cqw - 2*gap)/3.
+   Result: tile height = max(text-column height, 16:9 height). */
+.feature-media:not(.feature-media-card) {
+  min-height: calc((100cqw - var(--content-gap)) / 2 * 9 / 16);
+}
+.feature-3col .feature-media:not(.feature-media-card) {
+  min-height: calc((100cqw - 2 * var(--content-gap)) / 3 * 9 / 16);
+}
+
+/* Mobile: the row stacks to a single full-width column. Floor at 16:9 with a
+   definite min-height (100cqw is the full column width) rather than
+   aspect-ratio alone -- iOS Safari collapses an aspect-ratio box whose only
+   child is absolutely positioned to zero height, hiding the video. The
+   min-height gives it real height regardless. */
+@media (max-width: 768px) {
+  .feature-media:not(.feature-media-card),
+  .feature-3col .feature-media:not(.feature-media-card) {
+    min-height: calc(100cqw * 9 / 16);
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Three-column feature row -- e.g. the profile identity row
+   (stats | account | avatar). minmax(0, 1fr) keeps the three columns the
+   same width as the row scales: a plain 1fr floors each track at its
+   content's min-width, which lets a text-heavy column squeeze the media
+   column. Collapses with the standard stack below. */
+.feature-3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-title {
+  margin: 0;
+  font-size: var(--font-size-display);
+  line-height: 1.1;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.feature-lead {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-dark);
+}
+
+@media (max-width: 768px) {
+  /* Stack the feature row: text above the media/cards regardless of side.
+     The gap follows --content-gap's own flip to the small step. */
+  .feature {
+    grid-template-columns: 1fr;
+  }
+  .feature-media-left .feature-media {
+    order: 1;
+  }
+  /* Stacked: a right-column head returns to normal flow (no second column). */
+  .feature-col-right {
+    grid-column: auto;
+  }
+}
+
+/* Site Footer */
+.site-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* Equal 1fr side columns keep the center (copyright) truly centered,
+     independent of the legal/version widths. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: var(--color-surface);
+  border-top: var(--border-width) var(--border-style) var(--color-border);
+  padding: var(--space-2) calc(var(--space-3) + var(--safe-area-right))
+    calc(var(--space-2) + var(--safe-area-bottom)) calc(var(--space-3) + var(--safe-area-left));
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark);
+  z-index: 9999;
+  height: calc(var(--height-footer) + var(--safe-area-bottom));
+  min-width: var(--width-page-min);
+  white-space: nowrap;
+}
+
+/* Legal links (left column) sit flush to the left edge, one --space-1 apart. */
+.footer-legal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.footer-copyright {
+  text-align: center;
+}
+
+/* Social links (right column) sit at the right edge */
+.footer-socials {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.footer-social {
+  display: inline-flex;
+  color: var(--color-text-dark);
+  transition: color 0.25s ease;
+}
+
+.footer-social:hover {
+  color: var(--color-text);
+}
+
+/* ====================
+   SHARED GAME CANVAS
+   Styles shared between play.html and build preview
+   ==================== */
+
+.game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: var(--color-background);
+}
+
+/* ============================================
+   Header Account Button
+   ============================================ */
+.header-account {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.header-username {
+  font-size: var(--font-size);
+  color: var(--color-text-dark);
+  transition: color 0.15s ease;
+  transform: translateY(2px); /* Optical alignment with panel center */
+  padding-left: var(--space-2); /* Breathing room from any sibling icons in panel-right */
+}
+
+.header-account:hover .header-username {
+  color: var(--color-text);
+}
+
+.header-avatar {
+  height: calc(var(--height-header) - var(--border-width));
+  aspect-ratio: 1;
+  margin: calc(-1 * var(--space-2)) 0;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+/* Collapse the "Profile" label on mobile â€” the avatar alone is the
+   affordance at that width, matching the hamburger-vs-nav-buttons
+   pattern elsewhere. The label's own padding-left disappears with it,
+   so the avatar sits flush against any sibling icons. */
+@media (max-width: 768px) {
+  .header-username {
+    display: none;
+  }
+}
+
+.header-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.header-avatar-img.loaded {
+  opacity: 1;
+}
+
+/* Search box: an icon overlaid on the left of an input. The container is
+   relative + flex-aligned so the absolutely-positioned icon centers
+   vertically; display:flex on the icon collapses the SVG's line-height gap.
+   Icon size/color and input padding are set per use. */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--space-2);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* Shared text-input base for search fields (home games search, admin asset
+   browser, etc.). Pairs with the .search-icon base above: the left padding
+   reserves room for the leading icon. Callers override only what differs
+   (e.g. background, or extra right padding for a trailing clear button). */
+/* Search field = the standard .form-input plus a leading-icon gutter, a fixed control
+   height, a slightly raised fill, and compact text. Compose with .form-input on the
+   element (class="input form-inst-search"); focus + placeholder come from .form-input. */
+.form-inst-search {
+  height: var(--height-input);
+  padding-left: calc(var(--space-2) + 24px);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+/* Markdown documents (legal pages, etc.) rendered by UtilsMarkdown.
+   Headings render as compact bold text rather than browser defaults so
+   they sit well inside modals and the standalone legal page. */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.markdown-body h1:first-child,
+.markdown-body h2:first-child,
+.markdown-body h3:first-child,
+.markdown-body h4:first-child {
+  margin-top: 0;
+}
+
+.markdown-body p {
+  margin: 0 0 var(--space-2);
+  line-height: 1.5;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+}
+
+.markdown-body li {
+  margin-bottom: var(--space-1);
+  line-height: 1.5;
+}
+
+/* Nested lists sit inside their parent li; drop margins so nesting doesn't
+   open vertical gaps mid-list. */
+.markdown-body li > ul,
+.markdown-body li > ol {
+  margin: 0;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-dark);
+  padding-left: var(--space-2);
+  margin: 0 0 var(--space-2);
+}
+
+.markdown-body code {
+  font-family: var(--font-family-mono);
+  font-size: 0.85em;
+  background: var(--color-background);
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+}
+
+.markdown-body pre {
+  background: var(--color-background);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  margin: 0 0 var(--space-2);
+  overflow-x: auto;
+}
+
+/* Code inside a fenced block opts out of the inline-code chrome. */
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+  font-size: var(--font-size-sm);
+}
+
+/* display: block lets a wide table scroll horizontally instead of
+   overflowing its container. */
+.markdown-body table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-2);
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: var(--border-width) var(--border-style) var(--color-border);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  /* normal keeps each column at least as wide as its longest word so
+       overflow goes to the scrollbar rather than shrinking columns. */
+  overflow-wrap: normal;
+}
+
+.markdown-body th {
+  font-weight: 700;
+  background: var(--color-background);
+}
+
+/* Trim the trailing margin so the document sits flush in its container. */
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   Ambient panel glow -- a bright --accent band runs continuously around a
+   section panel's rounded border. The panel under the pointer stays lit and the
+   highlight only moves when the pointer enters a different panel (leaving into a
+   gap keeps the last one lit) -- UtilsMediaGlow.js does this for both mouse and
+   touch, toggling .ll-glow-active. Purely decorative; disabled under reduced-motion.
+   ============================================ */
+
+/* The sweep angle. Registered so it can be animated (a plain custom property
+   animates as a discrete swap, not a smooth rotation). */
+@property --ll-glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* One lap of the comet head around the perimeter. */
+@keyframes ll-glow-sweep {
+  from {
+    --ll-glow-angle: 0deg;
+  }
+  to {
+    --ll-glow-angle: 360deg;
+  }
+}
+
+/* The ring is an absolutely-positioned pseudo-element, so anchor it to the
+   panel. (The panel's backdrop-filter already forms a containing block; set
+   position explicitly so the ring doesn't silently depend on that.) */
+.feature,
+.section-glass {
+  position: relative;
+}
+
+/* The running light: a wide, bright conic band masked down to just the border
+   ring. The band is fixed in gradient space and the animated --ll-glow-angle
+   orbits it around the perimeter; the drop-shadow bloom is attached to the
+   band, so the glow travels WITH the light -- each point of the border pulses
+   bright as the head passes, then dims. The sweep is defined here but held
+   PAUSED; .ll-glow-active unpauses it (and fades the ring in). Pausing (rather
+   than removing the animation on deactivation) holds --ll-glow-angle at its
+   current value -- removing it would revert the registered property to its 0deg
+   initial, snapping the comet to the start point and flashing it during the
+   fade-out. */
+.feature::after,
+.section-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: ll-glow-sweep 5000ms linear infinite paused;
+  background: conic-gradient(
+    from var(--ll-glow-angle),
+    transparent 0deg,
+    transparent 45deg,
+    color-mix(in srgb, var(--color-accent) 20%, transparent) 65deg,
+    var(--color-accent) 80deg,
+    var(--color-accent-light) 90deg,
+    var(--color-accent) 100deg,
+    color-mix(in srgb, var(--color-accent) 20%, transparent) 115deg,
+    transparent 135deg,
+    transparent 360deg
+  );
+  filter: drop-shadow(0 0 5px var(--color-accent))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--color-accent) 50%, transparent));
+  -webkit-mask:
+    linear-gradient(black 0 0) content-box,
+    linear-gradient(black 0 0);
+  mask:
+    linear-gradient(black 0 0) content-box,
+    linear-gradient(black 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Light the current panel and run the sweep on it (only the shown panel
+   animates). UtilsMediaGlow.js toggles .ll-glow-active on the panel under the
+   pointer (mouse or touch) and keeps it there until the pointer enters a
+   different panel. */
+.feature.ll-glow-active::after,
+.section-glass.ll-glow-active::after {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+/* When an inner tile lights its own animated outline (hover / tap-reveal /
+   focus), hush the panel's ambient glow so the two don't compete -- the tile is
+   the focus. `:has()` outweighs the .ll-glow-active rule on specificity, so it
+   wins even while the panel is lit. Opacity fades at the panel's 0.5s; the
+   paused base keeps the comet's angle, so no start-point snap on the way out.
+   Hover is gated (like the tile's hover glow) so a touch tap's sticky :hover
+   can't trigger it. */
+.feature:has(.project-card.revealed)::after,
+.feature:has(.project-card:focus-within)::after,
+.section-glass:has(.project-card.revealed)::after,
+.section-glass:has(.project-card:focus-within)::after {
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .feature:has(.project-card:hover)::after,
+  .section-glass:has(.project-card:hover)::after {
+    opacity: 0;
+  }
+}
+
+/* No motion: drop the ring entirely. content: none wins over the .ll-glow-active
+   rule, which only sets opacity, so nothing renders. */
+@media (prefers-reduced-motion: reduce) {
+  .feature::after,
+  .section-glass::after {
+    content: none;
+  }
+}

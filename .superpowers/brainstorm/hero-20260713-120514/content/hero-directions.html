@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Level Lab Hero Directions</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --surface: #1a1a1a;
+      --surface-2: #252525;
+      --border: #3a3a3a;
+      --text: #e5e5e5;
+      --muted: #c5c5c5;
+      --quiet: #8c8c8c;
+      --accent: #0077ff;
+      --accent-hover: #2d8fff;
+      font-family: Roboto, Arial, sans-serif;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      width: min(1580px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 42px 0 60px;
+    }
+
+    .kicker {
+      margin: 0 0 10px;
+      color: #68aaff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 780px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      margin: 14px 0 30px;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .directions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .direction {
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 180ms ease, transform 180ms ease;
+    }
+
+    .direction:hover,
+    .direction.selected {
+      border-color: var(--accent);
+    }
+
+    .direction:hover { transform: translateY(-3px); }
+
+    .direction:focus-visible {
+      outline: 3px solid #68aaff;
+      outline-offset: 3px;
+    }
+
+    .direction.selected::after {
+      content: "Selected";
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 8;
+      padding: 7px 10px;
+      border-radius: 5px;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .mock-hero {
+      position: relative;
+      height: 430px;
+      overflow: hidden;
+      background: #1a1a1a;
+      isolation: isolate;
+    }
+
+    .mock-nav {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 46px;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(197,197,197,.18);
+      background: rgba(26,26,26,.92);
+      font-size: 11px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 5px;
+      color: #68aaff;
+      font-size: 10px;
+    }
+
+    .mini-nav { color: var(--quiet); }
+
+    .mini-signin {
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      color: #68aaff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      margin: 8px auto 0;
+      max-width: 390px;
+      color: var(--text);
+      font-size: 35px;
+      line-height: 1.02;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .accent-word { color: #68aaff; }
+
+    .hero-lead {
+      margin: 12px auto 0;
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .mock-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 116px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .mock-button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .play-icon {
+      width: 0;
+      height: 0;
+      margin-right: 8px;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid currentColor;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .peek-window {
+      position: absolute;
+      z-index: 2;
+      left: 30px;
+      right: 30px;
+      bottom: -92px;
+      height: 185px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px 10px 0 0;
+      background: var(--surface-2);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .window-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--quiet);
+    }
+
+    .window-label {
+      margin-left: auto;
+      color: var(--quiet);
+      font-size: 8px;
+    }
+
+    .direction-a .hero-copy { padding: 40px 24px 0; }
+
+    .direction-b .mock-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: rgba(15,15,15,.63);
+    }
+
+    .direction-b .video-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .direction-b .mock-nav {
+      background: rgba(20,20,20,.72);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .direction-b .hero-copy {
+      justify-content: flex-end;
+      min-height: 384px;
+      padding: 0 28px 42px;
+    }
+
+    .direction-b .hero-title {
+      max-width: 350px;
+      font-size: 38px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.75);
+    }
+
+    .direction-b .hero-lead { color: #e5e5e5; }
+
+    .direction-c .hero-copy { padding: 32px 24px 0; }
+
+    .direction-c .hero-title {
+      max-width: 380px;
+      font-size: 33px;
+    }
+
+    .product-reveal {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -24px;
+      z-index: 2;
+      height: 150px;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .reveal-label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 3;
+      padding: 6px 8px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 5px;
+      background: rgba(26,26,26,.84);
+      color: var(--text);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .direction-info {
+      min-height: 132px;
+      padding: 18px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .direction-heading {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 7px;
+      font-size: 16px;
+    }
+
+    .letter {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: #68aaff;
+      font-size: 12px;
+    }
+
+    .recommended {
+      padding: 4px 6px;
+      border: 1px solid #2d8fff;
+      border-radius: 5px;
+      color: #68aaff;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .direction-info p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .foundation {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+
+    .foundation span {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1050px) {
+      .directions { grid-template-columns: 1fr; }
+      .direction { max-width: 680px; }
+    }
+
+    @media (max-width: 600px) {
+      .page { width: min(100% - 24px, 1580px); padding-top: 26px; }
+      .mock-hero { height: 410px; }
+      .hero-title { font-size: 31px; }
+      .hero-actions { flex-direction: column; width: 100%; }
+      .mock-button { width: 100%; }
+      .peek-window { left: 16px; right: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+      video { display: none; }
+      .video-bg, .peek-window, .product-reveal { background: #303030; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <p class="kicker">Level Lab hero exploration</p>
+    <h1>Which composition should we develop?</h1>
+    <p class="intro">All three use the current Level Lab palette, compact radii, spacious hierarchy, accessible 44px actions, and the same primary/secondary CTA order. Click the direction that feels closest.</p>
+
+    <div class="directions">
+      <article class="direction direction-a" data-choice="a-centered-stage" tabindex="0" onclick="toggleSelect(this)">
+        <div class="mock-hero">
+          <div class="mock-nav"><span class="brand"><span class="brand-mark">LL</span>Level Lab</span><span class="mini-nav">Build&nbsp;&nbsp;&nbsp;Play</span><span class="mini-signin">Sign In</span></div>
+          <div class="hero-copy">
+            <span class="hero-eyebrow">Create • Play • Remix</span>
+            <div class="hero-title">Make a game.<br><span class="accent-word">Make it yours.</span></div>
+            <div class="hero-lead">Turn an idea into a playable 3D game, then remix every piece until it feels like you.</div>
+            <div class="hero-actions"><span class="mock-button primary">Start Creating</span><span class="mock-button"><span class="play-icon"></span>Play</span></div>
+          </div>
+          <div class="peek-window">
+            <div class="window-bar"><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span><span class="window-label">Made in Level Lab</span></div>
+            <video src="http://127.0.0.1:4173/assets/media/welcome.mp4" autoplay muted loop playsinline preload="metadata"></video>
+          </div>
+        </div>
+        <div class="direction-info">
+          <h2 class="direction-heading"><span class="letter">A</span>Centered Stage <span class="recommended">Recommended</span></h2>
+          <p>Closest to your example. The message and actions land first; the framed video peeks upward and pulls visitors into the product.</p>
+        </div>
+      </article>
+
+      <article class="direction direction-b" data-choice="b-video-canvas" tabindex="0" onclick="toggleSelect(this)">
+        <div class="mock-hero">
+          <div class="video-bg"><video src="http://127.0.0.1:4173/assets/media/welcome.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+          <div class="mock-nav"><span class="brand"><span class="brand-mark">LL</span>Level Lab</span><span class="mini-nav">Build&nbsp;&nbsp;&nbsp;Play</span><span class="mini-signin">Sign In</span></div>
+          <div class="hero-copy">
+            <span class="hero-eyebrow">Built to be played</span>
+            <div class="hero-title">Your idea.<br><span class="accent-word">Playable in minutes.</span></div>
+            <div class="hero-lead">Create, play, and remix directly in your browser.</div>
+            <div class="hero-actions"><span class="mock-button primary">Start Creating</span><span class="mock-button"><span class="play-icon"></span>Play</span></div>
+          </div>
+        </div>
+        <div class="direction-info">
+          <h2 class="direction-heading"><span class="letter">B</span>Video Canvas</h2>
+          <p>The video becomes the entire hero. It feels cinematic and game-forward, but needs stronger overlays and careful motion handling.</p>
+        </div>
+      </article>
+
+      <article class="direction direction-c" data-choice="c-builder-reveal" tabindex="0" onclick="toggleSelect(this)">
+        <div class="mock-hero">
+          <div class="mock-nav"><span class="brand"><span class="brand-mark">LL</span>Level Lab</span><span class="mini-nav">Build&nbsp;&nbsp;&nbsp;Play</span><span class="mini-signin">Sign In</span></div>
+          <div class="hero-copy">
+            <span class="hero-eyebrow">No download. No black box.</span>
+            <div class="hero-title">Imagine it. Build it.<br><span class="accent-word">Remix everything.</span></div>
+            <div class="hero-lead">A real game-making workspace that grows with every idea.</div>
+            <div class="hero-actions"><span class="mock-button primary">Start Creating</span><span class="mock-button"><span class="play-icon"></span>Play</span></div>
+          </div>
+          <div class="product-reveal"><span class="reveal-label">Inside Level Lab</span><video src="http://127.0.0.1:4173/assets/media/welcome.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+        </div>
+        <div class="direction-info">
+          <h2 class="direction-heading"><span class="letter">C</span>Builder Reveal</h2>
+          <p>The product rises directly from the bottom edge with no browser frame. It feels more native and product-led, with less decoration.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="foundation" aria-label="Shared UX foundations">
+      <span>One primary action</span><span>Neutral secondary action</span><span>44px touch targets</span><span>Readable text contrast</span><span>Reduced-motion fallback</span><span>Next section remains visible</span>
+    </div>
+  </main>
+</body>
+</html>

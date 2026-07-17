@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 350">
+  <defs>
+    <filter id="remove-white" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 0 0.933333 0 0 0 0 0.933333 0 0 0 0 0.933333 -0.333333 -0.333333 -0.333333 0 1" />
+    </filter>
+  </defs>
+  <image href="remix-icon-source.png" width="350" height="350" filter="url(#remove-white)" />
+</svg>

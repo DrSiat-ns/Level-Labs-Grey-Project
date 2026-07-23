@@ -411,13 +411,15 @@ test("Version D Grow cards orbit an interactive branch symbol", async () => {
 });
 
 test("Version D Grow uses the larger balanced desktop composition", async () => {
+  const html = await read("index.html");
   const css = await read("styles.css");
   const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
 
   assert.match(css, new RegExp(`${dSelector} #learn\\s*\\{[^}]*min-height:\\s*690px[^}]*border:\\s*0`, "s"));
   assert.match(css, new RegExp(`${dSelector} \.grow-orbit\\s*\\{[^}]*grid-template-rows:\\s*178px 210px[^}]*width:\\s*min\\(100%,\\s*1140px\\)`, "s"));
   assert.match(css, new RegExp(`${dSelector} \.grow-section \.flip-card\\s*\\{[^}]*width:\\s*340px[^}]*height:\\s*178px`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \.grow-hub-symbol\\s*\\{[^}]*width:\\s*190px[^}]*height:\\s*230px`, "s"));
+  assert.match(html, /class="grow-hub-symbol" viewBox="0 0 150 190"/);
+  assert.match(css, new RegExp(`${dSelector} \.grow-hub-symbol\\s*\\{[^}]*width:\\s*165px[^}]*height:\\s*250px`, "s"));
 });
 
 test("the Trust section uses a left message and three learn-more items", async () => {

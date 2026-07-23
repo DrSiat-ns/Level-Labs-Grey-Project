@@ -137,10 +137,25 @@ const createHero = (options = {}) => {
   };
 };
 
-test("hero query accepts a, b, and c", () => {
+test("hero query accepts every published hero version", () => {
   assert.equal(normalizeHeroVersion("?hero=a"), "a");
   assert.equal(normalizeHeroVersion("?hero=b"), "b");
   assert.equal(normalizeHeroVersion("?hero=c"), "c");
+  assert.equal(normalizeHeroVersion("?hero=d"), "d");
+  assert.equal(normalizeHeroVersion("?hero=e"), "e");
+});
+
+test("setup keeps Version E independent from Version D", () => {
+  const hero = createHero({ versions: ["a", "b", "c", "d", "e"] });
+  const root = createRoot(hero);
+
+  assert.equal(setupHeroVariants(root, "?hero=e", { matches: false }, null), "e");
+  assert.equal(hero.links[4].classList.contains("active"), true);
+  assert.equal(hero.links[3].classList.contains("active"), false);
+  assert.equal(hero.panels[4].hidden, false);
+  assert.equal(hero.panels[3].hidden, true);
+  assert.equal(hero.videos[4].src, "/e.mp4");
+  assert.equal(hero.videos[3].src, "");
 });
 
 test("hero query defaults unsupported and missing values to a", () => {

@@ -16,7 +16,7 @@ const getHeroPanelBlocks = (html) => {
   assert.ok(heroSectionMatch, "missing welcome hero section");
 
   const heroSection = heroSectionMatch[0];
-  const versions = ["a", "b", "c", "d"];
+  const versions = ["a", "b", "c", "d", "e"];
   const markerIndexes = versions.map((version) => {
     const markerPattern = new RegExp(`\\sdata-hero-panel="${version}"`, "g");
     const markerMatches = [...heroSection.matchAll(markerPattern)];
@@ -205,7 +205,11 @@ test("the capability rail uses the approved responsive grid", async () => {
   assert.match(css, /\.capability-icon\s*\{[^}]*width:\s*40px[^}]*height:\s*40px/s);
   assert.match(css, /\.capability-item\s*\{[^}]*border:\s*1px\s+solid\s+color-mix\([^}]*\)[^}]*border-radius:\s*var\(--radius-lg\)[^}]*background:\s*color-mix\([^}]*\)[^}]*backdrop-filter:\s*blur\(6px\)/s);
   assert.match(css, /\.capability-item\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--color-surface\) 42%, var\(--color-background\)\)/s);
-  assert.doesNotMatch(css, /\.capability-item\s*\+\s*\.capability-item\s*\{/s, "capability cards should use spacing instead of separator rules");
+  const sharedCss = css.replace(
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.capability-item \+ \.capability-item\s*\{[^}]*\}/s,
+    "",
+  );
+  assert.doesNotMatch(sharedCss, /\.capability-item\s*\+\s*\.capability-item\s*\{/s, "shared capability cards should use spacing instead of separator rules");
   assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.capability-list\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
   assert.match(css, /@media\s*\(max-width:\s*560px\)[\s\S]*?\.capability-list\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
 });
@@ -455,7 +459,7 @@ test("the shared closing CTA finishes every hero version", async () => {
   assert.match(css, /\.closing-cta-secondary\s*\{[^}]*background:\s*transparent/s);
 });
 
-test("homepage exposes four shareable hero versions and defaults to A", async () => {
+test("homepage exposes five shareable hero versions and defaults to A", async () => {
   const html = await read("index.html");
   const primaryNavMatch = html.match(
     /<nav\b(?=[^>]*\saria-label="Primary navigation")[^>]*>[\s\S]*?<\/nav>/,
@@ -491,6 +495,10 @@ test("homepage exposes four shareable hero versions and defaults to A", async ()
       label: "Version D",
       pattern: /<a\b(?=[^>]*\shref="index\.html\?hero=d")(?=[^>]*\saria-label="Version D")[^>]*>\s*<span class="version-word">Version <\/span>D\s*<\/a>/,
     },
+    {
+      label: "Version E",
+      pattern: /<a\b(?=[^>]*\shref="index\.html\?hero=e")(?=[^>]*\saria-label="Version E")[^>]*>\s*<span class="version-word">Version <\/span>E\s*<\/a>/,
+    },
   ];
   let previousIndex = -1;
   for (const { label, pattern } of orderedLinks) {
@@ -522,16 +530,34 @@ test("homepage exposes four shareable hero versions and defaults to A", async ()
       `hero panel ${version} must not eagerly load a video or source element`,
     );
   }
-  assert.match(html, /<script type="module" src="hero-variants\.mjs\?v=20260721-versiond2"><\/script>/);
+  assert.match(html, /<script type="module" src="hero-variants\.mjs\?v=20260723-versione1"><\/script>/);
+});
+
+test("Version E mirrors Version D while keeping its own route identity", async () => {
+  const html = await read("index.html");
+  const dStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-unframed" data-hero-panel="d"');
+  const eStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-e hero-variant-unframed" data-hero-panel="e"');
+  const eEnd = html.indexOf('<a class="grid-more"', eStart);
+
+  assert.ok(dStart >= 0, "Version D hero panel must remain present");
+  assert.ok(eStart > dStart && eEnd > eStart, "Version E hero panel must follow Version D");
+
+  const dPanel = html.slice(dStart, eStart);
+  const ePanel = html.slice(eStart, eEnd);
+  const normalizePanel = (panel) => panel
+    .replace("hero-variant-e ", "")
+    .replace('data-hero-panel="e"', 'data-hero-panel="d"')
+    .trim();
+
+  assert.equal(normalizePanel(ePanel), normalizePanel(dPanel));
+  assert.doesNotMatch(ePanel, /Inside Level Lab/);
 });
 
 test("Version D layers Version C hero content over its artwork", async () => {
   const html = await read("index.html");
   const css = await read("styles.css");
-  const dStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-unframed"');
-  const dEnd = html.indexOf('<a class="grid-more"', dStart);
-  assert.ok(dStart >= 0 && dEnd > dStart, "Version D hero panel must be present");
-  const dPanel = html.slice(dStart, dEnd);
+  const dPanel = getHeroPanelBlocks(html).find(({ version }) => version === "d")?.block;
+  assert.ok(dPanel, "Version D hero panel must be present");
   assert.match(dPanel, /data-hero-panel="d"/);
   assert.match(dPanel, /\shidden(?:\s|=|>)/);
   assert.match(dPanel, /class="hero-copy"/);
@@ -593,6 +619,15 @@ test("Version D uses editorial how-it-works panels without changing shared marku
   assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-face-back \\.how-step-number\\s*\\{[^}]*position:\\s*absolute[^}]*top:\\s*32px[^}]*right:\\s*32px`, "s"));
 });
 
+test("Version D how-it-works cards use an angled numbered progress rail", async () => {
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${dSelector} \\.how-steps\\s*\\{[^}]*position:\\s*relative[^}]*counter-reset:\\s*version-d-step[^}]*padding-top:\\s*58px`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-steps::before\\s*\\{[^}]*content:\\s*""[^}]*position:\\s*absolute[^}]*top:\\s*19px[^}]*height:\\s*1px[^}]*background:\\s*var\\(--color-accent\\)`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step::before\\s*\\{[^}]*content:\\s*"0" counter\\(version-d-step\\)[^}]*top:\\s*-58px[^}]*width:\\s*72px[^}]*height:\\s*34px[^}]*clip-path:\\s*polygon`, "s"));
+});
+
 test("Version D steps use supplied artwork above their copy", async () => {
   const html = await read("index.html");
   const css = await read("styles.css");
@@ -621,15 +656,17 @@ test("Version D steps use supplied artwork above their copy", async () => {
   await readFile(resolve(root, "assets/images/publish.png"));
 });
 
-test("Version D capability cards use the rounded title-and-icon hierarchy", async () => {
+test("Version D capability rail uses flat columns with inline title icons", async () => {
   const css = await read("styles.css");
   const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
 
-  assert.match(css, new RegExp(`${dSelector} \\.capability-item\\s*\\{[^}]*display:\\s*flex[^}]*flex-wrap:\\s*wrap[^}]*border:\\s*0[^}]*border-radius:\\s*30px`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-list\\s*\\{[^}]*gap:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-item\\s*\\{[^}]*display:\\s*grid[^}]*grid-template-columns:\\s*minmax\\(0, max-content\\) 24px[^}]*border:\\s*0[^}]*border-radius:\\s*0[^}]*background:\\s*transparent`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-item \\+ \\.capability-item\\s*\\{[^}]*border-left:\\s*1px solid color-mix\\(in srgb, var\\(--color-accent\\) 60%, transparent\\)`, "s"));
   assert.match(css, new RegExp(`${dSelector} \\.capability-copy\\s*\\{[^}]*display:\\s*contents`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \\.capability-icon\\s*\\{[^}]*order:\\s*2[^}]*width:\\s*28px[^}]*height:\\s*28px[^}]*border:\\s*0[^}]*background:\\s*transparent`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \\.capability-title\\s*\\{[^}]*order:\\s*1[^}]*font-size:\\s*20px[^}]*line-height:\\s*1\\.2`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \\.capability-description\\s*\\{[^}]*order:\\s*3[^}]*flex:\\s*0 0 100%[^}]*margin:\\s*0[^}]*font-size:\\s*15px[^}]*line-height:\\s*1\\.5`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-icon\\s*\\{[^}]*display:\\s*grid[^}]*position:\\s*static[^}]*grid-column:\\s*2[^}]*grid-row:\\s*1[^}]*width:\\s*24px[^}]*height:\\s*24px`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-title\\s*\\{[^}]*grid-column:\\s*1[^}]*grid-row:\\s*1[^}]*font-size:\\s*18px[^}]*line-height:\\s*1\\.25`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-description\\s*\\{[^}]*grid-column:\\s*1 \\/ -1[^}]*grid-row:\\s*2[^}]*margin:\\s*var\\(--space-3\\) 0 0[^}]*font-size:\\s*14px[^}]*line-height:\\s*1\\.45`, "s"));
 });
 
 test("Version D capability rail clears the overlapping hero video", async () => {
@@ -752,6 +789,28 @@ test("primary navigation links reveal a smooth mini underline", async () => {
 test("numbered feature steps are slightly indented from the lead copy", async () => {
   const css = await read("styles.css");
   assert.match(css, /\.steps\s*\{[^}]*padding-left:\s*var\(--space-2\)/s);
+});
+
+test("Version D Build uses the angled title rail treatment", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+
+  assert.match(
+    html,
+    /<section class="feature build-feature reveal"[^>]*>[\s\S]*?<div class="section-track section-track-build" aria-hidden="true">\s*<span class="section-track-tab"><strong>Build<\/strong><\/span>\s*<\/div>/,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-build\s*\{[^}]*display:\s*flex[^}]*width:\s*100vw[^}]*border-top:\s*1px solid[^}]*border-bottom:\s*1px solid/s,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab\s*\{[^}]*background:\s*var\(--color-border\)[^}]*transform:\s*skewX\(38deg\)/s,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab::after\s*\{[^}]*background:\s*var\(--color-accent\)/s,
+  );
 });
 
 test("Version B keeps its video-scrim foreground fixed across themes", async () => {

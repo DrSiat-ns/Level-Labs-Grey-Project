@@ -669,6 +669,32 @@ test("Version D capability rail uses flat columns with inline title icons", asyn
   assert.match(css, new RegExp(`${dSelector} \\.capability-description\\s*\\{[^}]*grid-column:\\s*1 \\/ -1[^}]*grid-row:\\s*2[^}]*margin:\\s*var\\(--space-3\\) 0 0[^}]*font-size:\\s*14px[^}]*line-height:\\s*1\\.45`, "s"));
 });
 
+test("Version E capability rail uses compact rounded cards with inline title icons", async () => {
+  const css = await read("styles.css");
+  const eSelector = String.raw`body:has\(\.hero-variant-e:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${eSelector} \\.capability-list\\s*\\{[^}]*gap:\\s*12px`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.capability-item\\s*\\{[^}]*min-height:\\s*156px[^}]*padding:\\s*28px[^}]*border:\\s*0[^}]*border-radius:\\s*28px[^}]*background:\\s*#1e1e21`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.capability-item \\+ \\.capability-item\\s*\\{[^}]*border-left:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.capability-title\\s*\\{[^}]*font-size:\\s*18px`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.capability-description\\s*\\{[^}]*font-size:\\s*14px[^}]*line-height:\\s*1\\.5`, "s"));
+});
+
+test("Version E how-it-works is a static unframed process rail", async () => {
+  const css = await read("styles.css");
+  const script = await read("script.js");
+  const eSelector = String.raw`body:has\(\.hero-variant-e:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${eSelector} \\.how-step\\s*\\{[^}]*min-height:\\s*0[^}]*border:\\s*0[^}]*border-radius:\\s*0[^}]*background:\\s*transparent[^}]*perspective:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step-media\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step \\.flip-card-inner\\s*\\{[^}]*min-height:\\s*0[^}]*transform:\\s*none !important[^}]*transition:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step \\.flip-face-front\\s*\\{[^}]*position:\\s*relative[^}]*padding:\\s*0[^}]*border:\\s*0[^}]*border-radius:\\s*0[^}]*background:\\s*transparent`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step \\.flip-face-back\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step-topline\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(script, /const staticHowSteps = selectedHeroVersion === "e";/);
+  assert.match(script, /if \(staticHowSteps && card\.classList\.contains\("how-step"\)\)/);
+});
+
 test("Version D capability rail clears the overlapping hero video", async () => {
   const css = await read("styles.css");
 

@@ -82,7 +82,19 @@ if (reduceMotion.matches || !("IntersectionObserver" in window)) {
   revealItems.forEach((item) => revealObserver.observe(item));
 }
 
+const selectedHeroVersion = new URLSearchParams(window.location.search).get("hero")?.toLowerCase();
+const staticHowSteps = selectedHeroVersion === "e";
+
 document.querySelectorAll(".flip-card").forEach((card) => {
+  if (staticHowSteps && card.classList.contains("how-step")) {
+    card.classList.remove("is-flipped");
+    card.removeAttribute("tabindex");
+    card.removeAttribute("role");
+    card.removeAttribute("aria-pressed");
+    card.removeAttribute("aria-label");
+    return;
+  }
+
   const toggle = () => {
     const isFlipped = card.classList.toggle("is-flipped");
     if (card.hasAttribute("aria-pressed")) {

@@ -845,6 +845,34 @@ body:has(.hero-variant-d:not([hidden])) .capability-description {
   line-height: 1.45;
 }
 
+body:has(.hero-variant-e:not([hidden])) .capability-list {
+  gap: 12px;
+  align-items: stretch;
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-item {
+  min-height: 156px;
+  padding: 28px;
+  border: 0;
+  border-radius: 28px;
+  background: #1e1e21;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-item + .capability-item {
+  border-left: 0;
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-title {
+  font-size: 18px;
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-description {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .how-it-works {
   width: 100%;
   max-width: var(--width-content);
@@ -1170,6 +1198,111 @@ body:has(.hero-variant-d:not([hidden])) .how-step-back-copy {
 @media (hover: hover) {
   body:has(.hero-variant-d:not([hidden])) .how-step:hover .flip-face {
     background: color-mix(in srgb, var(--color-surface-light) 72%, var(--color-background));
+  }
+}
+
+/* Version E keeps the numbered rail, but presents the steps as static text columns. */
+body:has(.hero-variant-e:not([hidden])) .how-steps {
+  width: min(100%, 1320px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  perspective: none;
+  cursor: default;
+  text-align: center;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step::before {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step,
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media],
+body:has(.hero-variant-e:not([hidden])) .how-step .flip-card-inner,
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .flip-card-inner,
+body:has(.hero-variant-e:not([hidden])) .how-step .flip-face,
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .flip-face {
+  min-height: 0;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step .flip-card-inner {
+  height: auto;
+  min-height: 0;
+  transform: none !important;
+  transform-style: flat;
+  transition: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step .flip-face-front {
+  position: relative;
+  inset: auto;
+  display: block;
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+  transform: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .flip-face-front {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step .flip-face-back {
+  display: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step-media {
+  display: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-body {
+  width: 100%;
+  padding: 0;
+  text-align: center;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step-topline {
+  display: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-topline {
+  display: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step-description {
+  max-width: 36ch;
+  margin: 10px auto 0;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+@media (hover: hover) {
+  body:has(.hero-variant-e:not([hidden])) .how-step:hover .flip-face,
+  body:has(.hero-variant-e:not([hidden])) .how-step:hover .flip-face-front {
+    background: transparent;
   }
 }
 

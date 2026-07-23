@@ -83,7 +83,12 @@ if (reduceMotion.matches || !("IntersectionObserver" in window)) {
 }
 
 document.querySelectorAll(".flip-card").forEach((card) => {
-  const toggle = () => card.classList.toggle("is-flipped");
+  const toggle = () => {
+    const isFlipped = card.classList.toggle("is-flipped");
+    if (card.hasAttribute("aria-pressed")) {
+      card.setAttribute("aria-pressed", String(isFlipped));
+    }
+  };
   card.addEventListener("click", toggle);
   card.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;

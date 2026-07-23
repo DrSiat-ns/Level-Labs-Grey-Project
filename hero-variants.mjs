@@ -1,4 +1,4 @@
-export const HERO_VERSIONS = new Set(["a", "b", "c"]);
+export const HERO_VERSIONS = new Set(["a", "b", "c", "d"]);
 
 const heroSetups = new WeakMap();
 

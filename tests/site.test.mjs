@@ -16,7 +16,7 @@ const getHeroPanelBlocks = (html) => {
   assert.ok(heroSectionMatch, "missing welcome hero section");
 
   const heroSection = heroSectionMatch[0];
-  const versions = ["a", "b", "c"];
+  const versions = ["a", "b", "c", "d"];
   const markerIndexes = versions.map((version) => {
     const markerPattern = new RegExp(`\\sdata-hero-panel="${version}"`, "g");
     const markerMatches = [...heroSection.matchAll(markerPattern)];
@@ -63,7 +63,7 @@ const getBalancedBlock = (source, openingBraceIndex, label) => {
 
 test("the homepage is a self-contained static entry point", async () => {
   const html = await read("index.html");
-  assert.match(html, /<link[^>]+href="styles\.css"/);
+  assert.match(html, /<link[^>]+href="styles\.css(?:\?v=[^"]+)?"/);
   assert.match(html, /<script[^>]+src="script\.js"/);
   assert.doesNotMatch(html, /(?:src|href)="\/(?!\/)/);
 });
@@ -158,7 +158,9 @@ test("Version A uses the notched video hero with a theme-colored action cutout",
   assert.match(css, /--hero-cutout-width:\s*min\(380px, calc\(100% - 20px\)\)/s);
   assert.doesNotMatch(css, /clip-path:\s*(?:polygon|shape)\(/s, "Version A should use the rounded overlay cutout");
   assert.match(css, /\.hero-variant-a \.hero-window \.hero-video\s*\{[^}]*height:\s*100%[^}]*object-fit:\s*cover/s);
-  assert.match(css, /\.hero-variant-a \.hero-window::after\s*\{[^}]*background:\s*rgba\(10, 10, 10, 0\.52\)/s);
+  assert.match(css, /\.hero-variant-a \.hero-window::after\s*\{[^}]*background:\s*rgba\(0, 32, 74, 0\.25\)/s);
+  assert.doesNotMatch(css, /\.hero-variant-a[^}]*-webkit-text-stroke/s, "Version A text should not use hard strokes");
+  assert.match(css, /\.hero-variant-a \.hero-title,[\s\S]*?text-shadow:\s*0 4px 14px rgba\(0, 0, 0, 0\.72\)/s);
   assert.match(css, /\.hero-variant-b\s*\{[^}]*background:\s*transparent/s);
   assert.match(css, /\.hero-variant-a \.hero-actions\s*\{[^}]*position:\s*absolute[^}]*right:\s*calc\([^}]*var\(--hero-cutout-width\)[^}]*var\(--hero-actions-width\)[^}]*\)[^}]*bottom:\s*14px/s);
   assert.match(css, /\.hero-variant-a \.hero-primary\s*\{[^}]*order:\s*1[^}]*flex:\s*1\.25 1 0/s);
@@ -289,8 +291,8 @@ test("the Build section uses the approved text-left video-right composition", as
   assert.match(build, /class="feature-text"[\s\S]*class="feature-media builder-showcase"/);
   assert.match(build, /class="builder-asset-panel"[^>]+src="assets\/images\/builder\/asset-tree\.png"/);
   assert.match(build, /class="builder-video-frame"[\s\S]*class="feature-video builder-video"/);
-  assert.match(build, /class="builder-assistant-panel"[^>]+src="assets\/images\/builder\/assistant-panel\.png"/);
-  assert.match(build, /src="assets\/media\/splash-build-1080\.mp4"/);
+  assert.doesNotMatch(build, /class="builder-assistant-panel"/);
+  assert.match(build, /src="assets\/media\/build2\.mp4"/);
   assert.ok(build.includes("Build</span> — AI that keeps you in control"));
   assert.ok(build.includes("Trust</span> — Safety built in, not patched on"));
   assert.ok(build.includes(">Start Creating<"));
@@ -298,9 +300,12 @@ test("the Build section uses the approved text-left video-right composition", as
   const css = await read("styles.css");
   assert.match(css, /\.build-feature\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*0\.9fr\)\s+minmax\(0,\s*1\.1fr\)[^}]*align-items:\s*center/s);
   assert.match(css, /\.build-feature \.feature-media\s*\{[^}]*min-height:\s*clamp\([^}]*overflow:\s*visible[^}]*border:\s*0[^}]*background:\s*transparent/s);
-  assert.match(css, /\.builder-video-frame\s*\{[^}]*left:\s*13%[^}]*z-index:\s*2[^}]*width:\s*78%[^}]*aspect-ratio:\s*16\s*\/\s*9/s);
-  assert.match(css, /\.builder-asset-panel\s*\{[^}]*top:\s*-2%[^}]*left:\s*0[^}]*z-index:\s*1/s);
-  assert.match(css, /\.builder-assistant-panel\s*\{[^}]*right:\s*0[^}]*z-index:\s*3/s);
+  assert.match(css, /\.builder-video-frame\s*\{[^}]*left:\s*6%[^}]*z-index:\s*2[^}]*width:\s*94%[^}]*aspect-ratio:\s*16\s*\/\s*9/s);
+  assert.match(css, /\.builder-asset-panel\s*\{[^}]*top:\s*-2%[^}]*left:\s*0[^}]*z-index:\s*1[^}]*width:\s*31\.2%[^}]*max-width:\s*216px/s);
+  assert.doesNotMatch(css, /\.builder-assistant-panel\s*\{/);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.build-feature\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.1fr\)\s+minmax\(0,\s*0\.9fr\)/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.build-feature \.feature-media\s*\{[^}]*grid-column:\s*1[^}]*grid-row:\s*1/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.build-feature \.feature-text\s*\{[^}]*grid-column:\s*2[^}]*grid-row:\s*1[^}]*transform:\s*translateX\(56px\)/s);
 });
 
 test("the Play section uses the approved featured game gallery", async () => {
@@ -384,6 +389,37 @@ test("the Grow section uses centered flip cards over the tree artwork", async ()
   assert.match(css, /\.grow-section \.flip-card\s*\{[^}]*height:\s*170px/s);
 });
 
+test("Version D Grow cards orbit an interactive branch symbol", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const grow = html.match(/<section class="feature grow-section reveal" id="learn"[\s\S]*?<\/section>/);
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.ok(grow, "missing the Grow section");
+  assert.match(grow[0], /class="grow-orbit"/);
+  assert.match(grow[0], /class="grow-hub"[^>]*tabindex="0"[^>]*aria-describedby="grow-hub-description"/);
+  assert.equal(countMatches(grow[0], /data-grow-card="(?:left|top|right)"/g), 3);
+  assert.equal(countMatches(grow[0], /data-grow-node="(?:left|top|right|lower-left|lower-right)"/g), 5);
+  assert.match(grow[0], /id="grow-hub-description"/);
+
+  assert.match(css, new RegExp(`${dSelector} \.grow-orbit\\s*\\{[^}]*display:\\s*grid[^}]*grid-template-areas:`, "s"));
+  assert.match(css, new RegExp(`${dSelector} #learn:has\\(\\[data-grow-card="left"\\]\\.is-flipped\\) \\[data-grow-node="left"\\]`, "s"));
+  assert.match(css, new RegExp(`${dSelector} #learn:has\\(\\[data-grow-card="top"\\]\\.is-flipped\\) \\[data-grow-node="top"\\]`, "s"));
+  assert.match(css, new RegExp(`${dSelector} #learn:has\\(\\[data-grow-card="right"\\]\\.is-flipped\\) \\[data-grow-node="right"\\]`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \.grow-hub:hover \.grow-hub-description`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \.grow-hub:focus-visible \.grow-hub-description`, "s"));
+});
+
+test("Version D Grow uses the larger balanced desktop composition", async () => {
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${dSelector} #learn\\s*\\{[^}]*min-height:\\s*690px[^}]*border:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \.grow-orbit\\s*\\{[^}]*grid-template-rows:\\s*178px 210px[^}]*width:\\s*min\\(100%,\\s*1140px\\)`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \.grow-section \.flip-card\\s*\\{[^}]*width:\\s*340px[^}]*height:\\s*178px`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \.grow-hub-symbol\\s*\\{[^}]*width:\\s*190px[^}]*height:\\s*230px`, "s"));
+});
+
 test("the Trust section uses a left message and three learn-more items", async () => {
   const html = await read("index.html");
   const trust = html.match(/<section class="feature trust-section reveal" id="safety"[\s\S]*?<\/section>/);
@@ -407,7 +443,7 @@ test("the shared closing CTA finishes every hero version", async () => {
   const ctaMatch = html.match(/<section class="closing-cta reveal"[\s\S]*?<\/section>/);
   assert.ok(ctaMatch, "missing the closing CTA");
   assert.match(ctaMatch[0], /aria-labelledby="closing-cta-title"/);
-  assert.match(ctaMatch[0], /Your next game starts here\./);
+  assert.match(ctaMatch[0], /Your next game starts here!/);
   assert.match(ctaMatch[0], /href="build\.html">Start Creating<\/a>/);
   assert.match(ctaMatch[0], /href="play\.html">Explore Games<\/a>/);
 
@@ -417,7 +453,7 @@ test("the shared closing CTA finishes every hero version", async () => {
   assert.match(css, /\.closing-cta-secondary\s*\{[^}]*background:\s*transparent/s);
 });
 
-test("homepage exposes three shareable hero versions and defaults to A", async () => {
+test("homepage exposes four shareable hero versions and defaults to A", async () => {
   const html = await read("index.html");
   const primaryNavMatch = html.match(
     /<nav\b(?=[^>]*\saria-label="Primary navigation")[^>]*>[\s\S]*?<\/nav>/,
@@ -448,6 +484,10 @@ test("homepage exposes three shareable hero versions and defaults to A", async (
     {
       label: "Version C",
       pattern: /<a\b(?=[^>]*\shref="index\.html\?hero=c")(?=[^>]*\saria-label="Version C")[^>]*>\s*<span class="version-word">Version <\/span>C\s*<\/a>/,
+    },
+    {
+      label: "Version D",
+      pattern: /<a\b(?=[^>]*\shref="index\.html\?hero=d")(?=[^>]*\saria-label="Version D")[^>]*>\s*<span class="version-word">Version <\/span>D\s*<\/a>/,
     },
   ];
   let previousIndex = -1;
@@ -480,7 +520,132 @@ test("homepage exposes three shareable hero versions and defaults to A", async (
       `hero panel ${version} must not eagerly load a video or source element`,
     );
   }
-  assert.match(html, /<script type="module" src="hero-variants\.mjs"><\/script>/);
+  assert.match(html, /<script type="module" src="hero-variants\.mjs\?v=20260721-versiond2"><\/script>/);
+});
+
+test("Version D layers Version C hero content over its artwork", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const dStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-unframed"');
+  const dEnd = html.indexOf('<a class="grid-more"', dStart);
+  assert.ok(dStart >= 0 && dEnd > dStart, "Version D hero panel must be present");
+  const dPanel = html.slice(dStart, dEnd);
+  assert.match(dPanel, /data-hero-panel="d"/);
+  assert.match(dPanel, /\shidden(?:\s|=|>)/);
+  assert.match(dPanel, /class="hero-copy"/);
+  assert.match(dPanel, /<span class="section-eyebrow">Welcome<\/span>/);
+  assert.match(dPanel, /<h1 class="hero-title"[^>]*><span>Build\.<\/span> Play\. Grow\. Trust\.<\/h1>/);
+  assert.match(dPanel, /class="hero-actions"/);
+  assert.match(dPanel, /class="hero-proof"/);
+  assert.match(dPanel, /class="hero-reveal hero-media hero-media-full"/);
+  assert.doesNotMatch(dPanel, /Inside Level Lab/);
+  assert.equal(countMatches(dPanel, /data-src="assets\/media\/welcome\.mp4"/g), 1);
+  assert.match(html, /class="capability-rail reveal"/);
+  assert.match(html, /id="build"/);
+  assert.match(html, /id="play"/);
+  assert.match(html, /id="learn"/);
+  assert.match(html, /id="safety"/);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\)::before\s*\{[^}]*background:\s*var\(--color-background\)/s);
+  assert.match(css, /\.hero-variant-d \.hero-copy\s*\{[^}]*padding-top:\s*clamp\(35px, 6vh, 65px\)/s);
+  assert.match(css, /\.hero-variant-d \.hero-reveal\s*\{[^}]*max-width:\s*var\(--width-content\)[^}]*margin:\s*0 auto/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #play\s*\{[^}]*background:\s*url\("assets\/images\/play-bg-d\.png"\)/s);
+  assert.match(css, /:root\[data-theme='light'\] body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #play\s*\{[^}]*background-image:\s*url\("assets\/images\/play-bg-d\.png"\)/s);
+  await read("assets/images/play-bg-d.png");
+});
+
+test("Version D uses the supplied Level Labs hero artwork", async () => {
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.match(
+    css,
+    new RegExp(`${dSelector}\\s*\\{[^}]*--color-background:\\s*#111017[^}]*background:\\s*#111017`, "s"),
+  );
+  assert.match(
+    css,
+    /\.hero-variant-d\.hero-variant-unframed\s*\{[^}]*background:[^;}]*url\("assets\/images\/level-labs-hero-d-3\.png"\)[^;}]*center\s*\/\s*cover\s+no-repeat/s,
+  );
+  assert.match(
+    css,
+    new RegExp(`${dSelector} \\.hero-shell\\s*\\{[^}]*width:\\s*calc\\(100% \\+[^}]*max-width:\\s*none[^}]*margin-top:\\s*calc\\(-1 \\* var\\(--content-gap\\)\\)`, "s"),
+  );
+  assert.match(
+    css,
+    /\.hero-variant-d\.hero-variant-unframed\s*\{[^}]*height:\s*calc\(100dvh - var\(--height-header\) - var\(--height-footer\)\)[^}]*overflow:\s*visible[^}]*border-radius:\s*0/s,
+  );
+  assert.doesNotMatch(css, /\.hero-variant-d\.hero-variant-unframed\s*\{[^}]*height:\s*auto/s);
+});
+
+test("Version D uses editorial how-it-works panels without changing shared markup", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.equal(countMatches(html, /class="how-step flip-card"/g), 3);
+  assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-face\\s*\\{[^}]*border-top:\\s*2px solid var\\(--color-accent\\)[^}]*border-radius:\\s*6px[^}]*background:\\s*color-mix\\(`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-face\\s*\\{[^}]*align-items:\\s*flex-start[^}]*text-align:\\s*left`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-card-inner\\s*\\{[^}]*transition:\\s*transform 240ms ease`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step-topline\\s*\\{[^}]*width:\\s*100%[^}]*flex-direction:\\s*row-reverse`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step-icon\\s*\\{[^}]*width:\\s*52px[^}]*height:\\s*52px[^}]*color:\\s*var\\(--color-accent-light\\)`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step-number\\s*\\{[^}]*border-radius:\\s*6px[^}]*background:\\s*color-mix\\(`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-face-back \\.how-step-number\\s*\\{[^}]*position:\\s*absolute[^}]*top:\\s*32px[^}]*right:\\s*32px`, "s"));
+});
+
+test("Version D steps use supplied artwork above their copy", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.match(
+    html,
+    /<li class="how-step flip-card" data-step-media[\s\S]*?<img class="how-step-media" src="assets\/images\/describe-your-idea\.png" alt="A creator building a game with Level Lab's AI assistant" width="1536" height="1080">[\s\S]*?<div class="how-step-body">[\s\S]*?<h3 class="how-step-title">Describe your idea<\/h3>/,
+  );
+  assert.match(
+    html,
+    /<li class="how-step flip-card" data-step-media[\s\S]*?<img class="how-step-media" src="assets\/images\/build-and-customize\.png" alt="The Level Lab editor while customizing a game world" width="1699" height="931"[^>]*>[\s\S]*?<div class="how-step-body">[\s\S]*?<h3 class="how-step-title">Build and customize<\/h3>/,
+  );
+  assert.match(
+    html,
+    /<li class="how-step flip-card" data-step-media[\s\S]*?<img class="how-step-media" src="assets\/images\/publish\.png" alt="Publishing a finished game from the Level Lab editor" width="1536" height="1024"[^>]*>[\s\S]*?<div class="how-step-body">[\s\S]*?<h3 class="how-step-title">Publish, play, and remix<\/h3>/,
+  );
+  assert.equal(countMatches(html, /<li class="how-step flip-card" data-step-media/g), 3);
+  assert.match(css, /\.how-step-media\s*\{[^}]*display:\s*none/s);
+  assert.match(css, new RegExp(`${dSelector} \\.how-step\\[data-step-media\\] \\.flip-face-front\\s*\\{[^}]*padding:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step-media\\s*\\{[^}]*display:\\s*block[^}]*width:\\s*100%[^}]*height:\\s*138px[^}]*object-fit:\\s*cover`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step\\[data-step-media\\] \\.flip-face-front\\s*\\{[^}]*border-top:\\s*0[^}]*border-bottom:\\s*1px solid var\\(--color-accent\\)`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.how-step\\[data-step-media\\] \\.how-step-topline\\s*\\{[^}]*display:\\s*none`, "s"));
+  await readFile(resolve(root, "assets/images/describe-your-idea.png"));
+  await readFile(resolve(root, "assets/images/build-and-customize.png"));
+  await readFile(resolve(root, "assets/images/publish.png"));
+});
+
+test("Version D capability cards use the rounded title-and-icon hierarchy", async () => {
+  const css = await read("styles.css");
+  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${dSelector} \\.capability-item\\s*\\{[^}]*display:\\s*flex[^}]*flex-wrap:\\s*wrap[^}]*border:\\s*0[^}]*border-radius:\\s*30px`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-copy\\s*\\{[^}]*display:\\s*contents`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-icon\\s*\\{[^}]*order:\\s*2[^}]*width:\\s*28px[^}]*height:\\s*28px[^}]*border:\\s*0[^}]*background:\\s*transparent`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-title\\s*\\{[^}]*order:\\s*1[^}]*font-size:\\s*20px[^}]*line-height:\\s*1\\.2`, "s"));
+  assert.match(css, new RegExp(`${dSelector} \\.capability-description\\s*\\{[^}]*order:\\s*3[^}]*flex:\\s*0 0 100%[^}]*margin:\\s*0[^}]*font-size:\\s*15px[^}]*line-height:\\s*1\\.5`, "s"));
+});
+
+test("Version D capability rail clears the overlapping hero video", async () => {
+  const css = await read("styles.css");
+
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.capability-rail\s*\{[^}]*margin-top:\s*max\(120px,\s*calc\(520px\s*\+/s,
+  );
+});
+
+test("Version D capability cards sit in the visual middle below the hero", async () => {
+  const css = await read("styles.css");
+
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) \.capability-list\s*\{[^}]*transform:\s*translateY\(clamp\(48px,\s*7vh,\s*72px\)\)/s,
+  );
 });
 
 test("each hero version keeps the approved actions and accessible labels", async () => {
@@ -640,7 +805,7 @@ test("required visual assets are local", async () => {
     readFile(resolve(root, "assets/media/background-dark.jpg")),
     readFile(resolve(root, "assets/media/background-light.jpg")),
     readFile(resolve(root, "assets/media/welcome.mp4")),
-    readFile(resolve(root, "assets/media/splash-build-1080.mp4")),
+    readFile(resolve(root, "assets/media/build2.mp4")),
     readFile(resolve(root, "assets/media/splash-play-1080.mp4")),
     readFile(resolve(root, "assets/media/highway-racer-hover.mp4")),
     readFile(resolve(root, "assets/media/escape-apocalypse-hover.mp4")),

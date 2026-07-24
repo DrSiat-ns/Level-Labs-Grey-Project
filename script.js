@@ -28,6 +28,53 @@ document.querySelectorAll("[data-media-fallback]").forEach((media) => {
   }, { once: true });
 });
 
+const glassHeroVideo = document.querySelector('.hero-variant-e [data-hero-video]');
+const glassHeroAmbient = document.querySelector('.hero-variant-e [data-hero-ambient]');
+
+if (glassHeroVideo instanceof HTMLVideoElement && glassHeroAmbient instanceof HTMLVideoElement) {
+  const syncAmbientSource = () => {
+    const source = glassHeroVideo.getAttribute("src");
+    if (!source) {
+      glassHeroAmbient.pause();
+      glassHeroAmbient.removeAttribute("src");
+      glassHeroAmbient.load();
+      return false;
+    }
+
+    if (glassHeroAmbient.getAttribute("src") !== source) {
+      glassHeroAmbient.src = source;
+      glassHeroAmbient.load();
+    }
+    return true;
+  };
+
+  const syncAmbientPlayback = () => {
+    if (!syncAmbientSource()) return;
+    glassHeroAmbient.playbackRate = glassHeroVideo.playbackRate;
+    const alignPlayback = () => {
+      if (
+        Number.isFinite(glassHeroVideo.currentTime)
+        && Math.abs(glassHeroAmbient.currentTime - glassHeroVideo.currentTime) > 0.12
+      ) {
+        glassHeroAmbient.currentTime = glassHeroVideo.currentTime;
+      }
+    };
+    if (glassHeroAmbient.readyState >= HTMLMediaElement.HAVE_METADATA) alignPlayback();
+    else glassHeroAmbient.addEventListener("loadedmetadata", alignPlayback, { once: true });
+    glassHeroAmbient.play().catch(() => {});
+  };
+
+  glassHeroVideo.addEventListener("playing", syncAmbientPlayback);
+  glassHeroVideo.addEventListener("seeking", syncAmbientPlayback);
+  glassHeroVideo.addEventListener("ratechange", syncAmbientPlayback);
+  glassHeroVideo.addEventListener("pause", () => glassHeroAmbient.pause());
+
+  new MutationObserver(syncAmbientSource).observe(glassHeroVideo, {
+    attributes: true,
+    attributeFilter: ["src"],
+  });
+}
+
 document.querySelectorAll("[data-hover-video]").forEach((card) => {
   const media = card.querySelector(".play-card-media");
   const video = card.querySelector(".play-card-live");

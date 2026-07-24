@@ -17,6 +17,30 @@
   font-display: fallback;
 }
 
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-400.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-600.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-700.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --grid-unit: 5px;
   --width-page-min: 320px;
@@ -471,6 +495,10 @@ body:has(.hero-variant-a:not([hidden])) .hero-shell::before {
   background: var(--color-background) url("assets/images/level-labs-hero-d-3.png") center / cover no-repeat;
 }
 
+.hero-variant-e.hero-variant-unframed {
+  background: #111017 url("assets/images/level-labs-hero-d-3.png") center / cover no-repeat;
+}
+
 .hero-variant-a::after {
   content: "";
   position: absolute;
@@ -681,7 +709,7 @@ body:has(.hero-variant-a:not([hidden])) .hero-shell::before {
 
 .hero-variant-d .hero-reveal {
   flex: 0 0 auto;
-  width: min(calc(100% - 80px), var(--width-content));
+  width: min(100%, var(--width-content));
   max-width: var(--width-content);
   margin: 0 auto;
 }
@@ -707,6 +735,42 @@ body:has(.hero-variant-a:not([hidden])) .hero-shell::before {
   color: var(--color-text);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+}
+
+/* Version E keeps a live reflected glow behind a clear hero video. */
+body:has(.hero-variant-e:not([hidden])) .hero-glass-screen {
+  isolation: isolate;
+  overflow: visible;
+  border-color: rgba(153, 201, 255, 0.42);
+  background: transparent;
+  box-shadow:
+    0 0 0 1px rgba(76, 139, 255, 0.12),
+    0 28px 90px rgba(36, 103, 255, 0.2);
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-glass-screen > .hero-video {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+  background: #080a12;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(72, 134, 255, 0.28);
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-ambient-video {
+  position: absolute;
+  inset: 6%;
+  z-index: 0;
+  display: block;
+  width: 88%;
+  height: 88%;
+  border-radius: inherit;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: blur(38px) saturate(1.75) brightness(1.08);
+  transform: scale(1.08);
+  pointer-events: none;
 }
 
 .capability-rail {
@@ -846,16 +910,21 @@ body:has(.hero-variant-d:not([hidden])) .capability-description {
 }
 
 body:has(.hero-variant-e:not([hidden])) .capability-list {
-  gap: 12px;
-  align-items: stretch;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+  width: min(100%, var(--width-content));
 }
 
 body:has(.hero-variant-e:not([hidden])) .capability-item {
-  min-height: 156px;
-  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 132px;
+  padding: 0;
   border: 0;
-  border-radius: 28px;
-  background: #1e1e21;
+  border-radius: 0;
+  background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -864,13 +933,53 @@ body:has(.hero-variant-e:not([hidden])) .capability-item + .capability-item {
   border-left: 0;
 }
 
+body:has(.hero-variant-e:not([hidden])) .capability-copy {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-icon {
+  position: static;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-accent-text);
+}
+
+body:has(.hero-variant-e:not([hidden])) .capability-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
 body:has(.hero-variant-e:not([hidden])) .capability-title {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
   font-size: 18px;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
 body:has(.hero-variant-e:not([hidden])) .capability-description {
+  display: -webkit-box;
+  max-width: 30ch;
+  min-height: 3em;
+  margin: 12px auto 0;
+  overflow: hidden;
   font-size: 14px;
   line-height: 1.5;
+  text-align: justify;
+  text-align-last: center;
+  overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .how-it-works {
@@ -1203,12 +1312,20 @@ body:has(.hero-variant-d:not([hidden])) .how-step-back-copy {
 
 /* Version E keeps the numbered rail, but presents the steps as static text columns. */
 body:has(.hero-variant-e:not([hidden])) .how-steps {
+  position: relative;
+  counter-reset: version-e-step;
   width: min(100%, 1320px);
   margin-right: auto;
   margin-left: auto;
 }
 
+body:has(.hero-variant-e:not([hidden])) .how-steps::before {
+  z-index: 0;
+  background: var(--color-accent);
+}
+
 body:has(.hero-variant-e:not([hidden])) .how-step {
+  counter-increment: version-e-step;
   min-height: 0;
   padding: 0;
   border: 0;
@@ -1220,8 +1337,37 @@ body:has(.hero-variant-e:not([hidden])) .how-step {
 }
 
 body:has(.hero-variant-e:not([hidden])) .how-step::before {
+  content: "";
+  top: -58px;
   left: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 60px;
+  padding: 0 0 22px;
+  clip-path: polygon(0 0, 50% 44%, 100% 0, 96% 56%, 52% 100%, 4% 56%);
+  background: var(--color-accent);
+  color: #ffffff;
+  text-align: center;
   transform: translateX(-50%);
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step::after {
+  content: "0" counter(version-e-step);
+  position: absolute;
+  top: -27px;
+  left: 50%;
+  z-index: 5;
+  display: block;
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 body:has(.hero-variant-e:not([hidden])) .how-step,
@@ -1288,8 +1434,9 @@ body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-top
 
 body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-title {
   margin: 0;
-  font-size: 28px;
+  font-size: clamp(22px, 2vw, 28px);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 body:has(.hero-variant-e:not([hidden])) .how-step-description {
@@ -1300,9 +1447,26 @@ body:has(.hero-variant-e:not([hidden])) .how-step-description {
 }
 
 @media (hover: hover) {
+  body:has(.hero-variant-e:not([hidden])) .how-step:hover,
+  body:has(.hero-variant-e:not([hidden])) .how-step:hover .flip-card-inner,
   body:has(.hero-variant-e:not([hidden])) .how-step:hover .flip-face,
   body:has(.hero-variant-e:not([hidden])) .how-step:hover .flip-face-front {
+    border-color: transparent;
     background: transparent;
+    box-shadow: none;
+    outline: 0;
+  }
+}
+
+body:has(.hero-variant-e:not([hidden])) .how-step:focus,
+body:has(.hero-variant-e:not([hidden])) .how-step:focus-visible {
+  box-shadow: none;
+  outline: 0;
+}
+
+@media (max-width: 768px) {
+  body:has(.hero-variant-e:not([hidden])) .how-step[data-step-media] .how-step-title {
+    white-space: normal;
   }
 }
 
@@ -1337,24 +1501,27 @@ body:has(.hero-variant-d:not([hidden])) #build .section-track-build {
   left: 50%;
   z-index: 4;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: 100vw;
-  height: 50px;
+  height: 34px;
   border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-bottom: 0;
   transform: translateX(-50%);
   pointer-events: none;
 }
 
 body:has(.hero-variant-d:not([hidden])) #build .section-track-tab {
   position: relative;
-  display: flex;
-  align-items: center;
-  width: 230px;
-  height: 50px;
-  margin-left: max(24px, calc((100vw - var(--width-content)) / 2 + 30px));
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 34px;
+  margin-top: -1px;
+  margin-right: max(24px, calc((100vw - var(--width-content)) / 2 + 24px));
+  margin-left: auto;
   background: var(--color-border);
-  transform: skewX(38deg);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 100%, 24px 100%);
+  transform: none;
 }
 
 body:has(.hero-variant-d:not([hidden])) #build .section-track-tab::before {
@@ -1365,28 +1532,20 @@ body:has(.hero-variant-d:not([hidden])) #build .section-track-tab::before {
 }
 
 body:has(.hero-variant-d:not([hidden])) #build .section-track-tab::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 62px;
-  width: 14px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--color-accent);
-  transform: translateY(-50%) skewX(-38deg);
+  display: none;
 }
 
 body:has(.hero-variant-d:not([hidden])) #build .section-track-tab strong {
   position: relative;
   z-index: 1;
-  padding-left: 84px;
-  color: var(--color-text);
-  font-size: 13px;
+  padding-left: 0;
+  color: var(--color-accent-light);
+  font-size: 12px;
   line-height: 1;
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  transform: skewX(-38deg);
+  transform: none;
 }
 
 body:has(.hero-variant-d:not([hidden])) #build .feature-text > .section-eyebrow {
@@ -2769,4 +2928,111 @@ body:has(.hero-variant-c:not([hidden])) #safety .trust-copy {
   body:has(.hero-variant-d:not([hidden])) .capability-list {
     transform: translateY(clamp(48px, 7vh, 72px));
   }
+}
+
+/* Version E page treatment: centered wide canvas over a solid ink background. */
+body:has(.hero-variant-e:not([hidden])) {
+  --version-e-page-width: 66rem;
+  --version-e-page-padding-y: clamp(3rem, 9vw, 9rem);
+  --version-e-page-padding-x: clamp(1rem, 3vw, 3rem);
+  --version-e-section-margin: clamp(3rem, 6vw, 6rem);
+  --version-e-content-spacing: clamp(1.5rem, 2.5vw, 2.5rem);
+  --width-content: var(--version-e-page-width);
+  --content-gap: var(--version-e-content-spacing);
+  --color-background: #111017;
+  --font-size: 16px;
+  font-size: var(--font-size);
+  font-family: "Poppins", sans-serif;
+  background: #111017;
+}
+
+body:has(.hero-variant-e:not([hidden])) .landing {
+  letter-spacing: 0;
+  word-spacing: 2.5px;
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-variant-e .hero-copy {
+  width: min(calc(100% - 40px), 1100px);
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-variant-e .hero-title {
+  color: #0077ff;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  body:has(.hero-variant-e:not([hidden])) .hero-variant-e .hero-copy {
+    width: min(100% - 40px, 820px);
+  }
+
+  body:has(.hero-variant-e:not([hidden])) .hero-variant-e .hero-title {
+    white-space: normal;
+  }
+}
+
+body:has(.hero-variant-e:not([hidden])) :is(.button-accent, .hero-primary) {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+body:has(.hero-variant-e:not([hidden])) :is(
+  .hero-variant-e .hero-title span,
+  .build-feature .feature-title .section-accent,
+  .play-gallery-title .section-accent,
+  .grow-section .feature-title .section-accent,
+  .trust-section .feature-title .section-accent
+) {
+  color: #0077ff;
+}
+
+body:has(.hero-variant-e:not([hidden]))::before {
+  background: #111017;
+  background-image: none;
+}
+
+body:has(.hero-variant-e:not([hidden])) .landing {
+  padding-top: 0;
+  padding-right: calc(var(--version-e-page-padding-x) + var(--safe-area-right));
+  padding-bottom: var(--version-e-page-padding-y);
+  padding-left: calc(var(--version-e-page-padding-x) + var(--safe-area-left));
+}
+
+body:has(.hero-variant-e:not([hidden])) .landing > section:not(.hero-shell) {
+  width: min(100%, var(--version-e-page-width));
+  max-width: var(--version-e-page-width);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body:has(.hero-variant-e:not([hidden])) .landing > section:not(.hero-shell, :first-child) {
+  margin-top: var(--version-e-section-margin);
+}
+
+body:has(.hero-variant-e:not([hidden])) .landing > :is(.build-feature, .play-gallery, .grow-section, .trust-section, .closing-cta) {
+  gap: var(--version-e-content-spacing);
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-shell,
+body:has(.hero-variant-e:not([hidden])) #play {
+  width: calc(100% + (2 * var(--version-e-page-padding-x)) + var(--safe-area-left) + var(--safe-area-right));
+  max-width: none;
+  margin-right: calc(-1 * (var(--version-e-page-padding-x) + var(--safe-area-right)));
+  margin-left: calc(-1 * (var(--version-e-page-padding-x) + var(--safe-area-left)));
+}
+
+body:has(.hero-variant-e:not([hidden])) .hero-shell {
+  margin-top: 0;
+}
+
+@media (min-width: 769px) {
+  body:has(.hero-variant-e:not([hidden])) .landing > section.capability-rail {
+    margin-top: clamp(210px, 18vw, 240px);
+  }
+}
+
+body:has(.hero-variant-e:not([hidden])) #play :is(.play-gallery-head, .play-gallery-grid, .play-gallery-cta) {
+  width: min(100%, var(--version-e-page-width));
+  max-width: var(--version-e-page-width);
+  margin-right: auto;
+  margin-left: auto;
 }

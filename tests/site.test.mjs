@@ -530,10 +530,10 @@ test("homepage exposes five shareable hero versions and defaults to A", async ()
       `hero panel ${version} must not eagerly load a video or source element`,
     );
   }
-  assert.match(html, /<script type="module" src="hero-variants\.mjs\?v=20260723-versione1"><\/script>/);
+  assert.match(html, /<script type="module" src="hero-variants\.mjs\?v=20260723-versione-glass"><\/script>/);
 });
 
-test("Version E mirrors Version D while keeping its own route identity", async () => {
+test("Version E keeps Version D content while using its own glass hero media", async () => {
   const html = await read("index.html");
   const dStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-unframed" data-hero-panel="d"');
   const eStart = html.indexOf('<div class="hero-variant hero-variant-d hero-variant-e hero-variant-unframed" data-hero-panel="e"');
@@ -544,13 +544,48 @@ test("Version E mirrors Version D while keeping its own route identity", async (
 
   const dPanel = html.slice(dStart, eStart);
   const ePanel = html.slice(eStart, eEnd);
-  const normalizePanel = (panel) => panel
-    .replace("hero-variant-e ", "")
-    .replace('data-hero-panel="e"', 'data-hero-panel="d"')
-    .trim();
-
-  assert.equal(normalizePanel(ePanel), normalizePanel(dPanel));
+  for (const copy of ["Welcome", "Build.", "Play.", "Grow.", "Trust.", "Start Creating"]) {
+    assert.match(dPanel, new RegExp(copy.replace(".", "\\.")));
+    assert.match(ePanel, new RegExp(copy.replace(".", "\\.")));
+  }
+  assert.match(dPanel, /data-src="assets\/media\/welcome\.mp4"/);
+  assert.match(ePanel, /class="hero-reveal hero-media hero-media-full hero-glass-screen"/);
+  assert.match(ePanel, /class="hero-ambient-video" data-hero-ambient/);
+  assert.match(ePanel, /data-src="assets\/media\/play-remix-share\.mp4"/);
+  assert.doesNotMatch(ePanel, /class="hero-glass-layer"/);
   assert.doesNotMatch(ePanel, /Inside Level Lab/);
+});
+
+test("Version E clear video keeps its synchronized live reflection", async () => {
+  const css = await read("styles.css");
+  const script = await read("script.js");
+  const eSelector = String.raw`body:has\(\.hero-variant-e:not\(\[hidden\]\)\)`;
+
+  assert.match(css, new RegExp(`${eSelector} \.hero-glass-screen\\s*\\{[^}]*isolation:\\s*isolate[^}]*overflow:\\s*visible[^}]*box-shadow:`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \.hero-ambient-video\\s*\\{[^}]*opacity:\\s*0\\.5`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \.hero-ambient-video\\s*\\{[^}]*filter:\\s*blur\\(38px\\)[^}]*saturate\\(1\\.75\\)`, "s"));
+  assert.doesNotMatch(css, new RegExp(`${eSelector} \.hero-glass-layer`));
+  assert.match(script, /glassHeroAmbient\.playbackRate = glassHeroVideo\.playbackRate/);
+  assert.match(script, /new MutationObserver\(syncAmbientSource\)/);
+  assert.match(script, /glassHeroVideo\.addEventListener\("pause", \(\) => glassHeroAmbient\.pause\(\)\)/);
+});
+
+test("Version E uses a centered solid canvas with full-bleed hero artwork", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const eSelector = String.raw`body:has\(\.hero-variant-e:not\(\[hidden\]\)\)`;
+
+  assert.match(html, /styles\.css\?v=20260723-e-hero-align/);
+  assert.match(css, new RegExp(`${eSelector}\\s*\\{[^}]*--version-e-page-width:\\s*66rem[^}]*--color-background:\\s*#111017[^}]*--font-size:\\s*16px[^}]*font-size:\\s*var\\(--font-size\\)[^}]*background:\\s*#111017`, "s"));
+  assert.match(css, new RegExp(`${eSelector}::before\\s*\\{[^}]*background:\\s*#111017[^}]*background-image:\\s*none`, "s"));
+  assert.match(css, /\.hero-variant-e\.hero-variant-unframed\s*\{[^}]*background:\s*#111017 url\("assets\/images\/level-labs-hero-d-3\.png"\) center \/ cover no-repeat/s);
+  assert.doesNotMatch(css, /linear-gradient\(0deg,\s*#1a1a1a 0%,\s*#252525 52%,\s*#0d498d 100%\)/);
+  assert.match(css, /--version-e-page-padding-y:\s*clamp\(3rem,\s*9vw,\s*9rem\)/);
+  assert.match(css, /--version-e-page-padding-x:\s*clamp\(1rem,\s*3vw,\s*3rem\)/);
+  assert.match(css, /--version-e-section-margin:\s*clamp\(3rem,\s*6vw,\s*6rem\)/);
+  assert.match(css, /--version-e-content-spacing:\s*clamp\(1\.5rem,\s*2\.5vw,\s*2\.5rem\)/);
+  assert.match(css, new RegExp(`${eSelector} \\.landing\\s*\\{[^}]*padding-top:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.hero-shell\\s*\\{[^}]*margin-top:\\s*0`, "s"));
 });
 
 test("Version D layers Version C hero content over its artwork", async () => {
@@ -691,8 +726,37 @@ test("Version E how-it-works is a static unframed process rail", async () => {
   assert.match(css, new RegExp(`${eSelector} \\.how-step \\.flip-face-front\\s*\\{[^}]*position:\\s*relative[^}]*padding:\\s*0[^}]*border:\\s*0[^}]*border-radius:\\s*0[^}]*background:\\s*transparent`, "s"));
   assert.match(css, new RegExp(`${eSelector} \\.how-step \\.flip-face-back\\s*\\{[^}]*display:\\s*none`, "s"));
   assert.match(css, new RegExp(`${eSelector} \\.how-step-topline\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step\\[data-step-media\\] \\.how-step-title\\s*\\{[^}]*font-size:\\s*clamp\\(22px, 2vw, 28px\\)[^}]*white-space:\\s*nowrap`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step:hover \\.flip-face-front\\s*\\{[^}]*border-color:\\s*transparent[^}]*box-shadow:\\s*none[^}]*outline:\\s*0`, "s"));
+  assert.match(css, new RegExp(`${eSelector} \\.how-step:focus-visible\\s*\\{[^}]*box-shadow:\\s*none[^}]*outline:\\s*0`, "s"));
   assert.match(script, /const staticHowSteps = selectedHeroVersion === "e";/);
   assert.match(script, /if \(staticHowSteps && card\.classList\.contains\("how-step"\)\)/);
+});
+
+test("Version E process rail uses compact narrow V-chevron number markers", async () => {
+  const css = await read("styles.css");
+  const eSelector = String.raw`body:has\(\.hero-variant-e:not\(\[hidden\]\)\)`;
+
+  assert.match(
+    css,
+    new RegExp(`${eSelector} \\.how-steps\\s*\\{[^}]*counter-reset:\\s*version-e-step`, "s")
+  );
+  assert.match(
+    css,
+    new RegExp(`${eSelector} \\.how-steps::before\\s*\\{[^}]*z-index:\\s*0[^}]*background:\\s*var\\(--color-accent\\)`, "s")
+  );
+  assert.match(
+    css,
+    new RegExp(`${eSelector} \\.how-step\\s*\\{[^}]*counter-increment:\\s*version-e-step`, "s")
+  );
+  assert.match(
+    css,
+    new RegExp(`${eSelector} \\.how-step::before\\s*\\{[^}]*z-index:\\s*3[^}]*width:\\s*48px[^}]*height:\\s*60px[^}]*padding:\\s*0 0 22px[^}]*clip-path:\\s*polygon\\(0 0, 50% 44%, 100% 0, 96% 56%, 52% 100%, 4% 56%\\)[^}]*background:\\s*var\\(--color-accent\\)`, "s")
+  );
+  assert.match(
+    css,
+    new RegExp(`${eSelector} \\.how-step::after\\s*\\{[^}]*content:\\s*"0" counter\\(version-e-step\\)[^}]*top:\\s*-27px[^}]*z-index:\\s*5[^}]*display:\\s*block[^}]*color:\\s*#ffffff`, "s")
+  );
 });
 
 test("Version D capability rail clears the overlapping hero video", async () => {
@@ -817,7 +881,7 @@ test("numbered feature steps are slightly indented from the lead copy", async ()
   assert.match(css, /\.steps\s*\{[^}]*padding-left:\s*var\(--space-2\)/s);
 });
 
-test("Version D Build uses the angled title rail treatment", async () => {
+test("Versions D and E Build use a right-aligned outlined tab on one full-width line", async () => {
   const html = await read("index.html");
   const css = await read("styles.css");
 
@@ -827,15 +891,19 @@ test("Version D Build uses the angled title rail treatment", async () => {
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-build\s*\{[^}]*display:\s*flex[^}]*width:\s*100vw[^}]*border-top:\s*1px solid[^}]*border-bottom:\s*1px solid/s,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-build\s*\{[^}]*display:\s*flex[^}]*width:\s*100vw[^}]*height:\s*34px[^}]*border-top:\s*1px solid[^}]*border-bottom:\s*0/s,
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab\s*\{[^}]*background:\s*var\(--color-border\)[^}]*transform:\s*skewX\(38deg\)/s,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab\s*\{[^}]*width:\s*140px[^}]*height:\s*34px[^}]*margin-left:\s*auto[^}]*background:\s*var\(--color-border\)[^}]*clip-path:\s*polygon\(0 0, calc\(100% - 24px\) 0, 100% 100%, 24px 100%\)[^}]*transform:\s*none/s,
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab::after\s*\{[^}]*background:\s*var\(--color-accent\)/s,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab::after\s*\{[^}]*display:\s*none/s,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab strong\s*\{[^}]*padding-left:\s*0[^}]*letter-spacing:\s*0\.18em[^}]*transform:\s*none/s,
   );
 });
 
@@ -855,6 +923,23 @@ test("Version B keeps its video-scrim foreground fixed across themes", async () 
       `${selector} must use a fixed readable token over Version B's dark scrim`,
     );
   }
+});
+
+test("Version E keeps its hero title on one desktop line with a compact fallback", async () => {
+  const css = await read("styles.css");
+
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-copy\s*\{[^}]*width:\s*min\(calc\(100% - 40px\),\s*1100px\)/s,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*white-space:\s*nowrap/s,
+  );
+  assert.match(
+    css,
+    /@media \(max-width:\s*900px\)[\s\S]*body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*white-space:\s*normal/s,
+  );
 });
 
 test("local destination pages are present and return home", async () => {
@@ -892,6 +977,7 @@ test("required visual assets are local", async () => {
     readFile(resolve(root, "assets/media/background-dark.jpg")),
     readFile(resolve(root, "assets/media/background-light.jpg")),
     readFile(resolve(root, "assets/media/welcome.mp4")),
+    readFile(resolve(root, "assets/media/play-remix-share.mp4")),
     readFile(resolve(root, "assets/media/build2.mp4")),
     readFile(resolve(root, "assets/media/splash-play-1080.mp4")),
     readFile(resolve(root, "assets/media/highway-racer-hover.mp4")),

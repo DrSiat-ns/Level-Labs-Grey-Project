@@ -934,7 +934,7 @@ test("Version E keeps its hero title on one desktop line with a compact fallback
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*white-space:\s*nowrap/s,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*color:\s*#0077ff[^}]*white-space:\s*nowrap/s,
   );
   assert.match(
     css,

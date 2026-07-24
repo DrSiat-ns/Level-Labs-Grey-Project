@@ -28,10 +28,11 @@ document.querySelectorAll("[data-media-fallback]").forEach((media) => {
   }, { once: true });
 });
 
-const glassHeroVideo = document.querySelector('.hero-variant-e [data-hero-video]');
-const glassHeroAmbient = document.querySelector('.hero-variant-e [data-hero-ambient]');
+document.querySelectorAll(".hero-glass-screen").forEach((screen) => {
+  const glassHeroVideo = screen.querySelector("[data-hero-video]");
+  const glassHeroAmbient = screen.querySelector("[data-hero-ambient]");
+  if (!(glassHeroVideo instanceof HTMLVideoElement) || !(glassHeroAmbient instanceof HTMLVideoElement)) return;
 
-if (glassHeroVideo instanceof HTMLVideoElement && glassHeroAmbient instanceof HTMLVideoElement) {
   const syncAmbientSource = () => {
     const source = glassHeroVideo.getAttribute("src");
     if (!source) {
@@ -73,7 +74,7 @@ if (glassHeroVideo instanceof HTMLVideoElement && glassHeroAmbient instanceof HT
     attributes: true,
     attributeFilter: ["src"],
   });
-}
+});
 
 document.querySelectorAll("[data-hover-video]").forEach((card) => {
   const media = card.querySelector(".play-card-media");
@@ -132,6 +133,96 @@ if (reduceMotion.matches || !("IntersectionObserver" in window)) {
 const selectedHeroVersion = new URLSearchParams(window.location.search).get("hero")?.toLowerCase();
 const staticHowSteps = selectedHeroVersion === "e";
 
+if (selectedHeroVersion === "d" && !reduceMotion.matches) {
+  const trustSection = document.querySelector("#safety");
+  const trustCards = trustSection ? [...trustSection.querySelectorAll(".trust-item")] : [];
+  const trustText = trustSection?.querySelector(".feature-text");
+  const trustGrid = trustSection?.querySelector(".safety-grid");
+
+  if (trustSection && trustText && trustGrid && trustCards.length) {
+    let trustFrame = 0;
+    const clamp = (value, minimum = 0, maximum = 1) => Math.min(maximum, Math.max(minimum, value));
+    const smooth = (value) => value * value * (3 - (2 * value));
+    const mix = (start, end, amount) => start + ((end - start) * amount);
+
+    const resetTrustCards = () => {
+      trustText.style.removeProperty("--trust-pin-y");
+      trustGrid.style.removeProperty("--trust-pin-y");
+      trustCards.forEach((card) => {
+        card.style.removeProperty("--trust-y");
+        card.style.removeProperty("--trust-scale");
+        card.style.removeProperty("--trust-opacity");
+        card.style.removeProperty("--trust-z");
+      });
+    };
+
+    const updateTrustStack = () => {
+      trustFrame = 0;
+
+      if (window.innerWidth <= 900) {
+        resetTrustCards();
+        return;
+      }
+
+      const sectionRect = trustSection.getBoundingClientRect();
+      const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--height-header")) || 60;
+      const sectionStyles = getComputedStyle(trustSection);
+      const paddingTop = parseFloat(sectionStyles.paddingTop) || 0;
+      const paddingBottom = parseFloat(sectionStyles.paddingBottom) || 0;
+      const baseTop = sectionRect.top + paddingTop;
+      const pinElement = (element, targetTop) => {
+        const maximum = Math.max(0, sectionRect.height - paddingTop - paddingBottom - element.getBoundingClientRect().height);
+        const pinOffset = clamp(targetTop - baseTop, 0, maximum);
+        element.style.setProperty("--trust-pin-y", `${pinOffset.toFixed(2)}px`);
+      };
+
+      pinElement(trustGrid, headerHeight + (window.innerHeight * 0.11));
+      pinElement(trustText, headerHeight + (window.innerHeight * 0.24));
+
+      const scrollRange = Math.max(1, sectionRect.height - window.innerHeight);
+      const progress = clamp((headerHeight - sectionRect.top) / scrollRange);
+      const cardHeight = trustCards[0].getBoundingClientRect().height;
+      const gap = 22;
+      const secondStart = cardHeight + gap;
+      const thirdStart = (2 * cardHeight) + (2 * gap);
+      const firstPhase = smooth(clamp((progress - 0.04) / 0.44));
+      const secondPhase = smooth(clamp((progress - 0.46) / 0.44));
+
+      const positions = [
+        0,
+        mix(secondStart, 18, firstPhase),
+        mix(thirdStart, 36, secondPhase),
+      ];
+      const scales = [
+        mix(1, 0.97, firstPhase),
+        mix(1, 0.985, secondPhase),
+        1,
+      ];
+      const opacities = [
+        mix(1, 0.62, firstPhase),
+        mix(1, 0.8, secondPhase),
+        1,
+      ];
+
+      trustCards.forEach((card, index) => {
+        card.style.setProperty("--trust-y", `${positions[index].toFixed(2)}px`);
+        card.style.setProperty("--trust-scale", scales[index].toFixed(3));
+        card.style.setProperty("--trust-opacity", opacities[index].toFixed(3));
+        card.style.setProperty("--trust-z", String(index + 1));
+      });
+    };
+
+    const scheduleTrustStack = () => {
+      if (trustFrame) return;
+      trustFrame = requestAnimationFrame(updateTrustStack);
+    };
+
+    window.addEventListener("scroll", scheduleTrustStack, { passive: true });
+    window.addEventListener("resize", scheduleTrustStack);
+    updateTrustStack();
+  }
+}
+
 document.querySelectorAll(".flip-card").forEach((card) => {
   if (staticHowSteps && card.classList.contains("how-step")) {
     card.classList.remove("is-flipped");
@@ -155,6 +246,56 @@ document.querySelectorAll(".flip-card").forEach((card) => {
     toggle();
   });
 });
+
+const growCarousel = document.querySelector("[data-grow-carousel]");
+if (growCarousel) {
+  const slides = [...growCarousel.querySelectorAll("[data-grow-slide]")];
+  const dots = [...growCarousel.querySelectorAll("[data-grow-dot]")];
+  const nodes = [...growCarousel.querySelectorAll("[data-grow-node-e]")];
+  const previousButton = growCarousel.querySelector("[data-grow-prev]");
+  const nextButton = growCarousel.querySelector("[data-grow-next]");
+  let activeSlide = 0;
+
+  const showGrowSlide = (requestedSlide) => {
+    activeSlide = (requestedSlide + slides.length) % slides.length;
+
+    slides.forEach((slide, index) => {
+      const isActive = index === activeSlide;
+      slide.hidden = !isActive;
+      slide.setAttribute("aria-hidden", String(!isActive));
+    });
+
+    dots.forEach((dot, index) => {
+      if (index === activeSlide) dot.setAttribute("aria-current", "true");
+      else dot.removeAttribute("aria-current");
+    });
+
+    nodes.forEach((node, index) => {
+      node.classList.toggle("is-active", index === activeSlide);
+    });
+
+    growCarousel.dataset.activeSlide = String(activeSlide);
+  };
+
+  previousButton?.addEventListener("click", () => showGrowSlide(activeSlide - 1));
+  nextButton?.addEventListener("click", () => showGrowSlide(activeSlide + 1));
+  dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => showGrowSlide(index));
+  });
+
+  growCarousel.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      showGrowSlide(activeSlide - 1);
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      showGrowSlide(activeSlide + 1);
+    }
+  });
+
+  showGrowSlide(0);
+}
 
 const themeToggle = document.querySelector("[data-theme-toggle]");
 if (themeToggle) {

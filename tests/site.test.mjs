@@ -68,6 +68,40 @@ test("the homepage is a self-contained static entry point", async () => {
   assert.doesNotMatch(html, /(?:src|href)="\/(?!\/)/);
 });
 
+test("the footer remains in page flow after all homepage content", async () => {
+  const [html, css] = await Promise.all([read("index.html"), read("styles.css")]);
+  const closingCtaIndex = html.indexOf('class="closing-cta');
+  const footerIndex = html.indexOf('class="site-footer"');
+
+  assert.ok(closingCtaIndex >= 0, "missing closing CTA");
+  assert.ok(footerIndex > closingCtaIndex, "footer must follow the closing CTA");
+  assert.match(
+    css,
+    /\.landing\s*>\s*\.site-footer\s*\{[^}]*position:\s*static[^}]*inset:\s*auto/s,
+    "footer must not stay pinned while the page scrolls",
+  );
+  assert.match(
+    css,
+    /body:\s*has\(>\s*main\.landing\)\s+\.landing\s*\{[^}]*bottom:\s*0/s,
+    "the scrolling page must extend to the bottom once the footer is in flow",
+  );
+});
+
+test("Version D uses the centered Level Lab footer stack without changing other versions", async () => {
+  const [html, css] = await Promise.all([read("index.html"), read("styles.css")]);
+  const dOnlySelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\)`;
+
+  assert.match(html, /class="footer-d-brand"[\s\S]*?Level Lab/);
+  for (const label of ["Build", "Play", "Learn", "Safety", "EULA", "Privacy"]) {
+    assert.match(html, new RegExp(`<a href="[^"]*">${label}</a>`));
+  }
+  assert.match(html, /class="footer-d-tagline">Build\. Play\. Grow\. Trust\.<\/p>/);
+  assert.match(html, /class="footer-d-copyright">&copy; 2026 Level Lab\. All rights reserved\.<\/p>/);
+  assert.match(css, new RegExp(`${dOnlySelector} \\.landing > \\.site-footer\\s*\\{[^}]*position:\\s*static[^}]*height:\\s*auto[^}]*background:\\s*#111017`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.footer-d-stack,`, "s"));
+  assert.match(css, /\.footer-d-stack,\s*\.footer-d-meta\s*\{\s*display:\s*none/s);
+});
+
 test("homepage preserves the staging information architecture", async () => {
   const html = await read("index.html");
   for (const id of ["welcome", "build", "play", "learn", "safety"]) {
@@ -99,7 +133,7 @@ test("all hero versions use the approved Welcome message", async () => {
   }
 });
 
-test("all hero versions show the approved prototype creator activity", async () => {
+test("all hero versions show the approved platform proof", async () => {
   const html = await read("index.html");
   const avatarPaths = Array.from(
     { length: 5 },
@@ -108,10 +142,13 @@ test("all hero versions show the approved prototype creator activity", async () 
 
   for (const { version, block } of getHeroPanelBlocks(html)) {
     const proofMatch = block.match(/<div class="hero-proof">[\s\S]*?<\/div>\s*<\/div>/);
-    assert.ok(proofMatch, `hero panel ${version} must include creator activity`);
+    assert.ok(proofMatch, `hero panel ${version} must include platform proof`);
     const proof = proofMatch[0];
     assert.equal(countMatches(proof, /class="hero-proof-avatar"/g), 5);
-    assert.match(proof, /<strong>879<\/strong> creators active this week/);
+    assert.match(proof, /<strong>1K\+ assets<\/strong>/);
+    assert.match(proof, /<strong>1\.2K games created this week<\/strong>/);
+    assert.match(proof, /<strong>Play instantly in your browser<\/strong>/);
+    assert.doesNotMatch(proof, /879 creators active this week/);
     assert.match(proof, /class="hero-proof-status" aria-hidden="true"/);
     for (const avatarPath of avatarPaths) {
       assert.ok(proof.includes(`src="${avatarPath}"`), `hero panel ${version} is missing ${avatarPath}`);
@@ -286,6 +323,28 @@ test("the how-it-works section follows the desktop wireframe with a responsive f
   assert.match(css, /@media\s*\(max-height:\s*768px\),\s*\(max-width:\s*768px\)[\s\S]*?\.how-steps\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
 });
 
+test("Versions A, B, and C use icon-free text cards for How Level Lab Works", async () => {
+  const css = await read("styles.css");
+  const abcSelector = String.raw`body:not\(:has\(\.hero-variant-d:not\(\[hidden\]\)\)\)`;
+
+  assert.match(
+    css,
+    new RegExp(`${abcSelector} \\.how-step-icon\\s*\\{[^}]*display:\\s*none`, "s"),
+  );
+  assert.match(
+    css,
+    new RegExp(`${abcSelector} \\.how-step \\.flip-face\\s*\\{[^}]*border-radius:\\s*8px[^}]*padding:\\s*30px`, "s"),
+  );
+  assert.match(
+    css,
+    new RegExp(`${abcSelector} \\.how-step-topline\\s*\\{[^}]*justify-content:\\s*flex-start[^}]*min-height:\\s*28px`, "s"),
+  );
+  assert.match(
+    css,
+    new RegExp(`${abcSelector} \\.how-step-title\\s*\\{[^}]*margin:\\s*28px 0 0[^}]*font-size:\\s*20px`, "s"),
+  );
+});
+
 test("the Build section uses the approved text-left video-right composition", async () => {
   const html = await read("index.html");
   const buildMatch = html.match(/<section class="feature build-feature reveal" id="build"[\s\S]*?<\/section>/);
@@ -444,6 +503,20 @@ test("the Trust section uses a left message and three learn-more items", async (
   assert.match(css, /body:has\(\.hero-variant-b:not\(\[hidden\]\)\) #safety \.trust-item,\s*body:has\(\.hero-variant-c:not\(\[hidden\]\)\) #safety \.trust-item\s*\{[^}]*text-align:\s*center/s);
 });
 
+test("Version D Trust keeps its scroll stack without leaving a blank runway before the closing CTA", async () => {
+  const css = await read("styles.css");
+  const dOnly = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\)`;
+  const dTrust = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\) \.trust-section`;
+
+  assert.doesNotMatch(css, new RegExp(`${dTrust}\\s*\\{[^}]*min-height:\\s*230vh`, "s"));
+  assert.match(css, new RegExp(`${dOnly}\\s*\\{[^}]*--version-d-trust-stack-height:[^}]*--version-d-trust-runway-height:`, "s"));
+  assert.match(css, new RegExp(`${dTrust}\\s*\\{[^}]*min-height:\\s*var\\(--version-d-trust-runway-height\\)`, "s"));
+  assert.match(
+    css,
+    new RegExp(`${dOnly} \\.closing-cta\\s*\\{[^}]*margin-top:\\s*calc\\(var\\(--version-d-trust-pad-y\\) \\+ var\\(--version-d-trust-stack-height\\) \\+ 48px - var\\(--version-d-trust-runway-height\\)\\)`, "s"),
+  );
+});
+
 test("the shared closing CTA finishes every hero version", async () => {
   const html = await read("index.html");
   const ctaMatch = html.match(/<section class="closing-cta reveal"[\s\S]*?<\/section>/);
@@ -600,7 +673,8 @@ test("Version D layers Version C hero content over its artwork", async () => {
   assert.match(dPanel, /<h1 class="hero-title"[^>]*><span>Build\.<\/span> Play\. Grow\. Trust\.<\/h1>/);
   assert.match(dPanel, /class="hero-actions"/);
   assert.match(dPanel, /class="hero-proof"/);
-  assert.match(dPanel, /class="hero-reveal hero-media hero-media-full"/);
+  assert.match(dPanel, /class="hero-reveal hero-media hero-media-full hero-glass-screen"/);
+  assert.match(dPanel, /class="hero-ambient-video" data-hero-ambient/);
   assert.doesNotMatch(dPanel, /Inside Level Lab/);
   assert.equal(countMatches(dPanel, /data-src="assets\/media\/welcome\.mp4"/g), 1);
   assert.match(html, /class="capability-rail reveal"/);
@@ -611,6 +685,10 @@ test("Version D layers Version C hero content over its artwork", async () => {
   assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\)::before\s*\{[^}]*background:\s*var\(--color-background\)/s);
   assert.match(css, /\.hero-variant-d \.hero-copy\s*\{[^}]*padding-top:\s*clamp\(35px, 6vh, 65px\)/s);
   assert.match(css, /\.hero-variant-d \.hero-reveal\s*\{[^}]*max-width:\s*var\(--width-content\)[^}]*margin:\s*0 auto/s);
+  assert.match(css, /\.hero-variant-d:not\(\.hero-variant-e\) \.hero-reveal\s*\{[^}]*width:\s*min\(82%,\s*1120px\)[^}]*max-width:\s*1120px/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\) \.hero-glass-screen\s*\{[^}]*isolation:\s*isolate[^}]*overflow:\s*visible[^}]*box-shadow:/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\) \.hero-ambient-video\s*\{[^}]*opacity:\s*0\.5[^}]*filter:\s*blur\(38px\)/s);
+  assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\) \.how-it-works-title\s*\{[^}]*font-size:\s*clamp\(34px,\s*3\.5vw,\s*48px\)/s);
   assert.match(css, /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #play\s*\{[^}]*background:\s*url\("assets\/images\/play-bg-d\.png"\)/s);
   assert.match(css, /:root\[data-theme='light'\] body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #play\s*\{[^}]*background-image:\s*url\("assets\/images\/play-bg-d\.png"\)/s);
   await read("assets/images/play-bg-d.png");
@@ -654,13 +732,23 @@ test("Version D uses editorial how-it-works panels without changing shared marku
   assert.match(css, new RegExp(`${dSelector} \\.how-step \\.flip-face-back \\.how-step-number\\s*\\{[^}]*position:\\s*absolute[^}]*top:\\s*32px[^}]*right:\\s*32px`, "s"));
 });
 
-test("Version D how-it-works cards use an angled numbered progress rail", async () => {
+test("Version D how-it-works uses numbered text fronts and artwork backs", async () => {
   const css = await read("styles.css");
-  const dSelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\)`;
+  const dOnlySelector = String.raw`body:has\(\.hero-variant-d:not\(\[hidden\]\)\):not\(:has\(\.hero-variant-e:not\(\[hidden\]\)\)\)`;
 
-  assert.match(css, new RegExp(`${dSelector} \\.how-steps\\s*\\{[^}]*position:\\s*relative[^}]*counter-reset:\\s*version-d-step[^}]*padding-top:\\s*58px`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \\.how-steps::before\\s*\\{[^}]*content:\\s*""[^}]*position:\\s*absolute[^}]*top:\\s*19px[^}]*height:\\s*1px[^}]*background:\\s*var\\(--color-accent\\)`, "s"));
-  assert.match(css, new RegExp(`${dSelector} \\.how-step::before\\s*\\{[^}]*content:\\s*"0" counter\\(version-d-step\\)[^}]*top:\\s*-58px[^}]*width:\\s*72px[^}]*height:\\s*34px[^}]*clip-path:\\s*polygon`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-steps\\s*\\{[^}]*width:\\s*min\\(100%,\\s*1200px\\)[^}]*padding-top:\\s*0[^}]*gap:\\s*50px`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step[\\s\\S]*?min-height:\\s*238px`, "s"));
+  assert.match(css, new RegExp(`@media \\(min-width:\\s*769px\\)\\s*\\{[^}]*${dOnlySelector} \\.how-steps\\s*\\{[^}]*grid-template-columns:\\s*repeat\\(3,\\s*minmax\\(0,\\s*1fr\\)\\)`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-steps::before\\s*\\{[^}]*content:\\s*none[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step::before\\s*\\{[^}]*content:\\s*none[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step-media\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step-topline\\s*\\{[^}]*display:\\s*flex`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step-icon\\s*\\{[^}]*display:\\s*none`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step-number\\s*\\{[^}]*font-size:\\s*0[^}]*background:\\s*transparent`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step-number::after\\s*\\{[^}]*content:\\s*"0" counter\\(version-d-step\\)[^}]*font-size:\\s*28px[^}]*color:\\s*#6f7cff`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step:nth-child\\(1\\) \\.flip-face-back\\s*\\{[^}]*describe-your-idea\\.png`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step:nth-child\\(2\\) \\.flip-face-back\\s*\\{[^}]*build-and-customize\\.png`, "s"));
+  assert.match(css, new RegExp(`${dOnlySelector} \\.how-step:nth-child\\(3\\) \\.flip-face-back\\s*\\{[^}]*publish\\.png`, "s"));
 });
 
 test("Version D steps use supplied artwork above their copy", async () => {
@@ -891,7 +979,7 @@ test("Versions D and E Build use a right-aligned outlined tab on one full-width 
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-build\s*\{[^}]*display:\s*flex[^}]*width:\s*100vw[^}]*height:\s*34px[^}]*border-top:\s*1px solid[^}]*border-bottom:\s*0/s,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-build\s*\{[^}]*top:\s*0[^}]*display:\s*flex[^}]*width:\s*100vw[^}]*height:\s*34px[^}]*border-top:\s*1px solid[^}]*border-bottom:\s*0/s,
   );
   assert.match(
     css,
@@ -904,6 +992,15 @@ test("Versions D and E Build use a right-aligned outlined tab on one full-width 
   assert.match(
     css,
     /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #build \.section-track-tab strong\s*\{[^}]*padding-left:\s*0[^}]*letter-spacing:\s*0\.18em[^}]*transform:\s*none/s,
+  );
+});
+
+test("Versions D and E separate Build from Play with a clear section gap", async () => {
+  const css = await read("styles.css");
+
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-d:not\(\[hidden\]\)\) #play\s*\{[^}]*margin-top:\s*clamp\(88px,\s*8vw,\s*128px\)/s,
   );
 });
 
@@ -934,12 +1031,44 @@ test("Version E keeps its hero title on one desktop line with a compact fallback
   );
   assert.match(
     css,
-    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*color:\s*#0077ff[^}]*white-space:\s*nowrap/s,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*color:\s*#ffffff[^}]*white-space:\s*nowrap/s,
   );
   assert.match(
     css,
     /@media \(max-width:\s*900px\)[\s\S]*body:has\(\.hero-variant-e:not\(\[hidden\]\)\) \.hero-variant-e \.hero-title\s*\{[^}]*white-space:\s*normal/s,
   );
+});
+
+test("Version E Grow uses an accessible four-page carousel without changing other versions", async () => {
+  const html = await read("index.html");
+  const css = await read("styles.css");
+  const js = await read("script.js");
+
+  assert.match(html, /class="grow-carousel-e"[^>]*data-grow-carousel/);
+  assert.equal((html.match(/data-grow-slide=/g) || []).length, 4);
+  assert.equal((html.match(/data-grow-dot=/g) || []).length, 4);
+  assert.match(html, /data-grow-prev[^>]*aria-label="Previous Grow panel"/);
+  assert.match(html, /data-grow-next[^>]*aria-label="Next Grow panel"/);
+  assert.match(html, /Your Games Grow/);
+  assert.match(html, /Most played game/);
+  assert.match(html, /Creator feedback/);
+  assert.match(html, /Creator leaderboard/);
+
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) #learn > :not\(\.grow-carousel-e\)\s*\{[^}]*display:\s*none/s,
+  );
+  assert.match(
+    css,
+    /body:has\(\.hero-variant-e:not\(\[hidden\]\)\) #learn \.grow-carousel-e\s*\{[^}]*display:\s*grid/s,
+  );
+  assert.match(css, /\.grow-carousel-e-control\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/s);
+
+  assert.match(js, /querySelector\("\[data-grow-carousel\]"\)/);
+  assert.match(js, /data-grow-node-e/);
+  assert.match(js, /aria-current/);
+  assert.match(js, /ArrowLeft/);
+  assert.match(js, /ArrowRight/);
 });
 
 test("local destination pages are present and return home", async () => {
